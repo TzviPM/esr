@@ -1,8 +1,8 @@
 #![feature(test)]
 
 extern crate test;
-extern crate esr;
-extern crate esr_visitor;
+use esr;
+
 
 use esr_visitor::{Visitable, Visitor};
 use test::{Bencher, black_box};

@@ -1,8 +1,8 @@
 #![feature(test)]
 
 extern crate test;
-extern crate esr;
-extern crate esr_transformer;
+use esr;
+
 
 use test::{Bencher, black_box};
 

@@ -12,7 +12,7 @@ pub struct Error {
 
 impl Debug for Error {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Unexpected {:?}({}) at {}:{}", &self.token, &*self.raw, self.start, self.end)
     }
 }
@@ -31,14 +31,14 @@ pub enum ParseError {
 
 impl Debug for ParseError {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(self, f)
     }
 }
 
 impl Display for ParseError {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             ParseError::UnexpectedEndOfProgram => {
                 r#try!(write!(f, "Unexpected end of program"))

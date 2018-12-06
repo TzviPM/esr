@@ -6,7 +6,7 @@ use crate::ast::Loc;
 /// `Node` is a specialized `Cell` that holds a reference to T instead of T.
 /// `Node` has defined lifetime and implements `Defer<Target = T>` for convenience.
 #[derive(Clone, Copy)]
-pub struct Node<'ast, T: 'ast> {
+pub struct Node<'ast, T> {
     inner: CopyCell<&'ast Loc<T>>
 }
 
@@ -47,7 +47,7 @@ impl<'ast, T: 'ast + PartialEq> PartialEq for Node<'ast, T> {
 
 impl<'ast, T: 'ast + Debug> Debug for Node<'ast, T> {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(self.deref(), f)
     }
 }

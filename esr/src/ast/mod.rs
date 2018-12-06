@@ -23,7 +23,7 @@ pub use crate::ast::literal::Literal;
 
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct Block<'ast, T: 'ast> {
+pub struct Block<'ast, T> {
     pub body: NodeList<'ast, T>
 }
 

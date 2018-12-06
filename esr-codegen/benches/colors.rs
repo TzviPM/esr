@@ -1,8 +1,8 @@
 #![feature(test)]
 
 extern crate test;
-extern crate esr;
-extern crate esr_codegen;
+use esr;
+use esr_codegen;
 
 use test::Bencher;
 

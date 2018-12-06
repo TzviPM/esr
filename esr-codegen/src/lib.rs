@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[macro_use]
 extern crate pretty_assertions;
-extern crate esr;
+
 
 use esr::ast::{Node, ExpressionNode, Loc, Block, Pattern};
 use esr::Module;
@@ -177,7 +177,7 @@ impl Generator for PrettyGenerator {
     }
 }
 
-pub fn codegen(module: &Module, minify: bool) -> String {
+pub fn codegen(module: &Module<'_>, minify: bool) -> String {
     if minify {
         let mut gen = MinifyingGenerator::new();
 

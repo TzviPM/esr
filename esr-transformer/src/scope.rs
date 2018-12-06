@@ -59,18 +59,18 @@ impl<'ast> Scope<'ast> {
 
     #[inline]
     pub fn as_usize(&'ast self) -> usize {
-        self as *const Scope as usize
+        self as *const Scope<'_> as usize
     }
 
     #[inline]
     pub unsafe fn from_usize(ptr: usize) -> &'ast Self {
-        &*(ptr as *const Scope)
+        &*(ptr as *const Scope<'_>)
     }
 }
 
 /// Need to manually implement Debug to avoid circular reference on `parent`
 impl<'ast> Debug for Scope<'ast> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("Scope")
             .field("kind", &self.kind)
             .field("used_super", &self.used_super)

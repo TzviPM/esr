@@ -1,9 +1,9 @@
 #![feature(test)]
 
-extern crate esr;
-extern crate serde_json;
+use esr;
+use serde_json;
 extern crate test;
-extern crate toolshed;
+use toolshed;
 
 use test::Bencher;
 

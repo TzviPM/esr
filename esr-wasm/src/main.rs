@@ -1,6 +1,6 @@
-extern crate esr;
-extern crate esr_codegen;
-extern crate serde_json;
+use esr;
+use esr_codegen;
+use serde_json;
 
 use std::os::raw::c_char;
 use std::ffi::CStr;

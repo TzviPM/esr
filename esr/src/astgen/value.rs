@@ -10,7 +10,7 @@ pub struct RegExLiteral<'ast> {
 }
 
 #[inline]
-pub fn parse_regex(value: &str) -> RegExLiteral {
+pub fn parse_regex(value: &str) -> RegExLiteral<'_> {
     let mut end = value.len() - 1;
     for index in (0..value.len()).rev() {
         if "/" == &value[index..=index] {

@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[macro_use]
 extern crate pretty_assertions;
-extern crate esr;
+
 
 use esr::ast::expression::*;
 use esr::ast::statement::*;
@@ -69,21 +69,21 @@ pub trait Visitor<'ast> {
 
     // statements
     fn on_expression_statement(&mut self, item: &'ast ExpressionNode<'ast>, node: &'ast StatementNode<'ast>) {}
-    fn on_declaration_statement(&mut self, item: &DeclarationStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_return_statement(&mut self, item: &ReturnStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_break_statement(&mut self, item: &BreakStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_continue_statement(&mut self, item: &ContinueStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_throw_statement(&mut self, item: &ThrowStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_if_statement(&mut self, item: &IfStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_while_statement(&mut self, item: &WhileStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_do_statement(&mut self, item: &DoStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_for_statement(&mut self, item: &ForStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_for_in_statement(&mut self, item: &ForInStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_for_of_statement(&mut self, item: &ForOfStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_try_statement(&mut self, item: &TryStatement, node: &'ast StatementNode<'ast>) {}
+    fn on_declaration_statement(&mut self, item: &DeclarationStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_return_statement(&mut self, item: &ReturnStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_break_statement(&mut self, item: &BreakStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_continue_statement(&mut self, item: &ContinueStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_throw_statement(&mut self, item: &ThrowStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_if_statement(&mut self, item: &IfStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_while_statement(&mut self, item: &WhileStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_do_statement(&mut self, item: &DoStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_for_statement(&mut self, item: &ForStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_for_in_statement(&mut self, item: &ForInStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_for_of_statement(&mut self, item: &ForOfStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_try_statement(&mut self, item: &TryStatement<'_>, node: &'ast StatementNode<'ast>) {}
     fn on_block_statement(&mut self, item: &BlockStatement<'ast>, node: &'ast StatementNode<'ast>) {}
-    fn on_labeled_statement(&mut self, item: &LabeledStatement, node: &'ast StatementNode<'ast>) {}
-    fn on_switch_statement(&mut self, item: &SwitchStatement, node: &'ast StatementNode<'ast>) {}
+    fn on_labeled_statement(&mut self, item: &LabeledStatement<'_>, node: &'ast StatementNode<'ast>) {}
+    fn on_switch_statement(&mut self, item: &SwitchStatement<'_>, node: &'ast StatementNode<'ast>) {}
     fn on_function_statement(&mut self, item: &FunctionStatement<'ast>, node: &'ast StatementNode<'ast>) {}
     fn on_class_statement(&mut self, item:&ClassStatement<'ast>, node: &'ast StatementNode<'ast>) {}
 }

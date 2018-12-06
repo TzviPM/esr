@@ -1,6 +1,7 @@
 [package]
 name = "esr"
 version = "0.1.0"
+edition = "2018"
 authors = ["Tzvi Melamed <tzvi@melamed.biz>"]
 license = "MIT"
 description = "ECMAScript-style language transpiler in Rust"

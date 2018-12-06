@@ -1,8 +1,9 @@
 [package]
 name = "esr-visitor"
 version = "0.1.0"
-authors = ["Maciej Hirsz <maciej.hirsz@gmail.com>"]
-license = "MIT/Apache-2.0"
+authors = ["Tzvi Melamed <tzvi@melamed.biz>"]
+edition = "2018"
+license = "MIT"
 description = "JavaScript transpiler in Rust"
 repository = "https://github.com/tzvipm/esr"
 documentation = "https://github.com/tzvipm/esr"

@@ -3,6 +3,7 @@ name = "ffi"
 version = "0.1.0"
 authors = ["Tzvi Melamed <tzvi@melamed.biz>"]
 license = "MIT"
+edition = "2018"
 build = "build.rs"
 
 [lib]

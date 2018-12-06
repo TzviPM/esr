@@ -1,0 +1,30 @@
+{
+  "name": "esr-ffi",
+  "version": "0.1.0",
+  "description": "FFI for Esr toolchain",
+  "main": "lib/index.js",
+  "author": "Tzvi Melamed <tzvi@melamed.biz>",
+  "license": "MIT",
+  "dependencies": {
+    "neon": "^2.0.0",
+    "neon-cli": "^0.2.0"
+  },
+  "devDependencies": {
+    "acorn": "^6.0.4",
+    "babylon": "^6.18.0",
+    "bench-runner": "^1.3.4",
+    "esformatter-parser": "^1.0.0",
+    "espree": "^5.0.0",
+    "esprima": "^4.0.1",
+    "flow-parser": "^0.87.0",
+    "mocha": "^5.2.0",
+    "recast": "^0.16.1",
+    "typescript": "^3.2.1",
+    "typescript-eslint-parser": "^21.0.2"
+  },
+  "scripts": {
+    "install": "neon build --release",
+    "test": "mocha",
+    "benches": "bench-runner"
+  }
+}

@@ -1,0 +1,31 @@
+language: rust
+
+cache:
+  cargo: true
+
+rust:
+  - stable
+  - beta
+  - nightly
+
+env:
+  global:
+    - CLIPPY_TOOLCHAIN=nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+
+os:
+  - linux
+
+before_install:
+  - source $HOME/.nvm/nvm.sh
+  - nvm install 10
+  - nvm use 10
+
+before_script:
+  - rustup install $CLIPPY_TOOLCHAIN
+  - rustup component add clippy-preview --toolchain=$CLIPPY_TOOLCHAIN
+
+script: ./test.sh

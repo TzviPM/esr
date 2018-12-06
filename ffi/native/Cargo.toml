@@ -1,0 +1,28 @@
+[package]
+name = "ffi"
+version = "0.1.0"
+authors = ["Tzvi Melamed <tzvi@melamed.biz>"]
+license = "MIT"
+build = "build.rs"
+
+[lib]
+name = "ffi"
+crate-type = ["dylib"]
+path = "src/lib.rs"
+
+[build-dependencies]
+neon-build = "0.2"
+
+[dependencies]
+neon = { version = "0.2", default-features = false }
+esr = { path = "../../esr", version = "0.1.0" }
+esr-codegen = { path = "../../esr-codegen", version = "0.1.0" }
+serde = "1.0"
+serde_json = { version = "1.0", features = ["preserve_order"] }
+serde_derive = "1.0"
+
+[profile.release]
+lto = true
+
+[profile.bench]
+lto = true

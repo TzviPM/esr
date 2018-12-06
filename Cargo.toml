@@ -1,0 +1,13 @@
+[workspace]
+members = [
+    "esr",
+    "esr-codegen",
+    "esr-visitor",
+    "esr-transformer",
+    "esr-wasm",
+]
+exclude = [ "ffi" ]
+
+[profile]
+release = { lto = true }
+bench = { lto = true }

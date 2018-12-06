@@ -1,0 +1,17 @@
+[package]
+name = "esr"
+version = "0.1.0"
+authors = ["Tzvi Melamed <tzvi@melamed.biz>"]
+license = "MIT"
+description = "ECMAScript-style language transpiler in Rust"
+repository = "https://github.com/tzvipm/esr"
+documentation = "https://github.com/tzvipm/esr"
+
+[dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+toolshed = { version = "0.4", features = ["impl_serialize"] }
+
+[dev-dependencies]
+pretty_assertions = "0.4"
+serde_json = { version = "1.0", features = ["preserve_order"] }

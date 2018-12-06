@@ -1,7 +1,7 @@
 use esr::ast::{Statement, Declarator, DeclarationKind};
 use esr::ast::statement::*;
 
-use {ToCode, Generator};
+use crate::{ToCode, Generator};
 
 
 impl<'ast, G: Generator> ToCode<G> for Statement<'ast> {
@@ -34,7 +34,7 @@ impl<'ast, G: Generator> ToCode<G> for Statement<'ast> {
             For(ref for_statement)       => gen.write(for_statement),
             ForIn(ref for_in)            => gen.write(for_in),
             ForOf(ref for_of)            => gen.write(for_of),
-            Try(ref try)                 => gen.write(try),
+            Try(ref r#try)                 => gen.write(r#try),
             Labeled(ref labeled)         => gen.write(labeled),
             Block(ref block)             => gen.write(block),
             Function(ref function)       => gen.write(function),
@@ -311,7 +311,7 @@ impl<'ast, G: Generator> ToCode<G> for SwitchCase<'ast> {
 
 #[cfg(test)]
 mod test {
-    use assert_min;
+    use crate::assert_min;
 
     #[test]
     fn block_statement() {

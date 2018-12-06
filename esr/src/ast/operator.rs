@@ -1,5 +1,5 @@
-use lexer::Token;
-use lexer::Token::*;
+use crate::lexer::Token;
+use crate::lexer::Token::*;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum OperatorKind {

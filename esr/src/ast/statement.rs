@@ -1,5 +1,5 @@
-use ast::{Node, NodeList, DeclarationKind, Function, Class, MandatoryName, IdentifierNode};
-use ast::{ExpressionNode, StatementNode, StatementList, Block, BlockNode, Pattern};
+use crate::ast::{Node, NodeList, DeclarationKind, Function, Class, MandatoryName, IdentifierNode};
+use crate::ast::{ExpressionNode, StatementNode, StatementList, Block, BlockNode, Pattern};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Declarator<'ast> {

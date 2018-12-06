@@ -1,7 +1,7 @@
 use esr::ast::{Expression, Literal, OperatorKind, OperatorCategory, Property, PropertyKey, Pattern};
 use esr::ast::expression::*;
 
-use {ToCode, Generator};
+use crate::{ToCode, Generator};
 
 
 impl<'ast, G: Generator> ToCode<G> for Expression<'ast> {
@@ -353,7 +353,7 @@ impl<'ast, G: Generator> ToCode<G> for ObjectExpression<'ast> {
 
 #[cfg(test)]
 mod test {
-    use {assert_min, assert_pretty};
+    use crate::{assert_min, assert_pretty};
 
     #[test]
     fn values() {

@@ -1,15 +1,15 @@
 use toolshed::list::{ListBuilder, GrowableList};
-use parser::{Parser, Parse, ANY, B0};
-use lexer::Token::*;
-use lexer::Asi;
-use ast::{Node, NodeList, Declarator, DeclarationKind};
-use ast::{Statement, StatementNode, Expression, ExpressionNode, Class, Function, Pattern};
-use ast::expression::BinaryExpression;
-use ast::statement::{ThrowStatement, ContinueStatement, BreakStatement, ReturnStatement};
-use ast::statement::{TryStatement, CatchClause, IfStatement, WhileStatement, DoStatement};
-use ast::statement::{DeclarationStatement, ForStatement, ForInStatement, ForOfStatement};
-use ast::statement::{SwitchStatement, SwitchCase, LabeledStatement, ForInit};
-use ast::OperatorKind::*;
+use crate::parser::{Parser, Parse, ANY, B0};
+use crate::lexer::Token::*;
+use crate::lexer::Asi;
+use crate::ast::{Node, NodeList, Declarator, DeclarationKind};
+use crate::ast::{Statement, StatementNode, Expression, ExpressionNode, Class, Function, Pattern};
+use crate::ast::expression::BinaryExpression;
+use crate::ast::statement::{ThrowStatement, ContinueStatement, BreakStatement, ReturnStatement};
+use crate::ast::statement::{TryStatement, CatchClause, IfStatement, WhileStatement, DoStatement};
+use crate::ast::statement::{DeclarationStatement, ForStatement, ForInStatement, ForOfStatement};
+use crate::ast::statement::{SwitchStatement, SwitchCase, LabeledStatement, ForInit};
+use crate::ast::OperatorKind::*;
 
 
 type StatementHandler = for<'ast> fn(&mut Parser<'ast>) -> StatementNode<'ast>;
@@ -56,7 +56,7 @@ macro_rules! create_handlers {
 }
 
 /// Shared expression handlers that produce StatementNode<'ast>
-use parser::expression::handlers::{
+use crate::parser::expression::handlers::{
     PRN, ARR, OP, NEW, REG, THIS, TRUE, FALS, NULL, UNDE, STR, NUM, BIN, TPLS, TPLE
 };
 
@@ -623,10 +623,10 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::parse;
-    use parser::mock::Mock;
-    use ast::{NodeList, Literal, Function, Class, OperatorKind, BlockStatement};
-    use ast::expression::*;
+    use crate::parser::parse;
+    use crate::parser::mock::Mock;
+    use crate::ast::{NodeList, Literal, Function, Class, OperatorKind, BlockStatement};
+    use crate::ast::expression::*;
 
     #[test]
     fn block_statement() {

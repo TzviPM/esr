@@ -1,7 +1,7 @@
 use serde::ser::{Serialize, Serializer, SerializeStruct};
-use ast::{Expression, Loc, OperatorKind};
-use ast::expression::*;
-use astgen::SerializeInLoc;
+use crate::ast::{Expression, Loc, OperatorKind};
+use crate::ast::expression::*;
+use crate::astgen::SerializeInLoc;
 
 #[inline]
 fn expression_type(operator: OperatorKind, prefix: bool) -> &'static str {

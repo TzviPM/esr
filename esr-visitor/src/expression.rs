@@ -1,7 +1,7 @@
 use esr::ast::{Identifier, Expression, ExpressionNode, StatementNode, Literal};
 use esr::ast::expression::*;
 
-use {Visitor, Visitable, ParentNode};
+use crate::{Visitor, Visitable, ParentNode};
 
 
 impl<'ast> Visitable<'ast> for ExpressionNode<'ast> {

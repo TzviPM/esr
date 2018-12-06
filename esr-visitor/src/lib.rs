@@ -286,7 +286,7 @@ impl<'ast> Visitable<'ast> for StatementList<'ast> {
 mod test {
     use super::*;
     use esr::parse;
-    use ScopeKind::*;
+    use crate::ScopeKind::*;
 
     struct ScopeTest<'ast> {
         depth: i32,

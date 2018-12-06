@@ -1,6 +1,6 @@
-use ast::statement::*;
-use ast::{Block, DeclarationKind, Declarator, Loc, Statement};
-use astgen::SerializeInLoc;
+use crate::ast::statement::*;
+use crate::ast::{Block, DeclarationKind, Declarator, Loc, Statement};
+use crate::astgen::SerializeInLoc;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 // TODO: DRY with BlockStatement

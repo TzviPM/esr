@@ -1,11 +1,11 @@
 use toolshed::list::ListBuilder;
-use parser::Parser;
-use lexer::Token;
-use lexer::Token::*;
-use ast::{NodeList, Expression, ExpressionNode};
-use ast::expression::*;
-use ast::OperatorKind::*;
-use lexer::Asi;
+use crate::parser::Parser;
+use crate::lexer::Token;
+use crate::lexer::Token::*;
+use crate::ast::{NodeList, Expression, ExpressionNode};
+use crate::ast::expression::*;
+use crate::ast::OperatorKind::*;
+use crate::lexer::Asi;
 
 const TOTAL_TOKENS: usize = 108;
 

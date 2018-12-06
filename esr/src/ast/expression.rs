@@ -1,5 +1,5 @@
-use ast::{Node, NodeList, Literal, OperatorKind, Function, Class, EmptyName, OptionalName};
-use ast::{Identifier, IdentifierNode, BlockNode, ExpressionNode, Statement, ExpressionList, Pattern};
+use crate::ast::{Node, NodeList, Literal, OperatorKind, Function, Class, EmptyName, OptionalName};
+use crate::ast::{Identifier, IdentifierNode, BlockNode, ExpressionNode, Statement, ExpressionList, Pattern};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum PropertyKey<'ast> {

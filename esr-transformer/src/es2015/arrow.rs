@@ -3,7 +3,7 @@ use esr::ast::expression::{ArrowExpression, ArrowBody};
 use esr::ast::statement::ReturnStatement;
 use esr_visitor::Visitor;
 
-use TransformerCtxt;
+use crate::TransformerCtxt;
 
 pub struct TransformArrow<'ast> {
     ctx: TransformerCtxt<'ast>

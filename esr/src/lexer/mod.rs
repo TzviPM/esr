@@ -2,13 +2,13 @@ mod token;
 mod labels;
 mod util;
 
-pub use lexer::token::*;
+pub use crate::lexer::token::*;
 
-use lexer::labels::*;
-use lexer::token::Token::*;
+use crate::lexer::labels::*;
+use crate::lexer::token::Token::*;
 
 use std::str;
-use error::Error;
+use crate::error::Error;
 use toolshed::Arena;
 
 macro_rules! expect_byte {

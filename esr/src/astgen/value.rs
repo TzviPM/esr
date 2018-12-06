@@ -1,6 +1,6 @@
-use ast::expression::{PropertyKey, TaggedTemplateExpression, TemplateLiteral};
-use ast::{Expression, Literal, Loc, NodeList, Pattern, Property};
-use astgen::SerializeInLoc;
+use crate::ast::expression::{PropertyKey, TaggedTemplateExpression, TemplateLiteral};
+use crate::ast::{Expression, Literal, Loc, NodeList, Pattern, Property};
+use crate::astgen::SerializeInLoc;
 use serde::ser::{Serialize, SerializeSeq, SerializeStruct, Serializer};
 
 #[derive(Debug, Serialize, PartialEq)]

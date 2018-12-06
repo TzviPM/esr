@@ -1,5 +1,5 @@
-use ast::{Node, Loc, IdentifierNode, ExpressionNode};
-use ast::{BlockNode, Statement, PatternList, PropertyKey};
+use crate::ast::{Node, Loc, IdentifierNode, ExpressionNode};
+use crate::ast::{BlockNode, Statement, PatternList, PropertyKey};
 
 pub trait Name<'ast>: Copy {
     fn empty() -> Self;

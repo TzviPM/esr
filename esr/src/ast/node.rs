@@ -1,7 +1,7 @@
 use toolshed::CopyCell;
 use std::ops::Deref;
 use std::fmt::{self, Debug};
-use ast::Loc;
+use crate::ast::Loc;
 
 /// `Node` is a specialized `Cell` that holds a reference to T instead of T.
 /// `Node` has defined lifetime and implements `Defer<Target = T>` for convenience.

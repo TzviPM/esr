@@ -8,23 +8,23 @@ mod nested;
 
 use toolshed::list::ListBuilder;
 use toolshed::Arena;
-use error::Error;
-use module::Module;
+use crate::error::Error;
+use crate::module::Module;
 
 use self::error::ToError;
 use self::nested::*;
 
-use ast::{Loc, Node, Statement, NodeList, Block, BlockNode};
-use ast::{Expression, ExpressionNode, ExpressionList, IdentifierNode};
-use ast::{OperatorKind, Pattern};
-use ast::expression::BinaryExpression;
-use lexer::{Lexer, Asi};
-use lexer::Token::*;
+use crate::ast::{Loc, Node, Statement, NodeList, Block, BlockNode};
+use crate::ast::{Expression, ExpressionNode, ExpressionList, IdentifierNode};
+use crate::ast::{OperatorKind, Pattern};
+use crate::ast::expression::BinaryExpression;
+use crate::lexer::{Lexer, Asi};
+use crate::lexer::Token::*;
 
 pub trait Parse<'ast> {
     type Output;
 
-    fn parse(&mut Parser<'ast>) -> Self::Output;
+    fn parse(_: &mut Parser<'ast>) -> Self::Output;
 }
 
 pub struct Parser<'ast> {
@@ -239,7 +239,7 @@ pub fn parse<'src, 'ast>(source: &'src str) -> Result<Module<'ast>, Vec<Error>> 
 #[cfg(test)]
 mod mock {
     use super::*;
-    use ast::{Literal, ExpressionNode, Block, BlockNode, Name};
+    use crate::ast::{Literal, ExpressionNode, Block, BlockNode, Name};
 
     pub struct Mock {
         arena: Arena
@@ -296,7 +296,7 @@ mod mock {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::mock::Mock;
+    use crate::parser::mock::Mock;
 
     #[test]
     fn empty_parse() {

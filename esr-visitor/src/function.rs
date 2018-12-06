@@ -1,7 +1,7 @@
 use esr::ast::{Function, Class, ClassMember, Name, EmptyName, OptionalName, MandatoryName};
 use esr::ast::{Node, ExpressionNode, StatementNode};
 
-use {Visitable, Visitor, ScopeKind, NoParent};
+use crate::{Visitable, Visitor, ScopeKind, NoParent};
 
 
 impl<'ast> Visitable<'ast> for EmptyName {

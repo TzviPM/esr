@@ -11,15 +11,15 @@ pub mod statement;
 use toolshed::list::List;
 use std::ops::Deref;
 
-pub use ast::variable::*;
-pub use ast::operator::*;
-pub use ast::node::Node;
+pub use crate::ast::variable::*;
+pub use crate::ast::operator::*;
+pub use crate::ast::node::Node;
 // pub use ast::types::{Type, Primitive};
-pub use ast::expression::{Expression, Property, PropertyKey};
-pub use ast::statement::{Statement, Declarator, BlockStatement};
-pub use ast::function::{Function, Class, ClassMember, Method, MethodKind};
-pub use ast::function::{Name, EmptyName, OptionalName, MandatoryName};
-pub use ast::literal::Literal;
+pub use crate::ast::expression::{Expression, Property, PropertyKey};
+pub use crate::ast::statement::{Statement, Declarator, BlockStatement};
+pub use crate::ast::function::{Function, Class, ClassMember, Method, MethodKind};
+pub use crate::ast::function::{Name, EmptyName, OptionalName, MandatoryName};
+pub use crate::ast::literal::Literal;
 
 
 #[derive(Debug, PartialEq, Clone, Copy)]

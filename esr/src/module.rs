@@ -1,6 +1,6 @@
 use toolshed::list::UnsafeList;
 use toolshed::Arena;
-use ast::StatementList;
+use crate::ast::StatementList;
 use std::marker::PhantomData;
 
 /// A JavaScript module parsed to an AST.

@@ -1,9 +1,9 @@
 use toolshed::list::ListBuilder;
-use parser::{Parser, Parse, BindingPower, ANY, B0, B15};
-use lexer::Token::*;
-use ast::{Node, NodeList, Expression, ExpressionNode, IdentifierNode, ExpressionList};
-use ast::{Property, PropertyKey, OperatorKind, Literal, Function, Class, StatementNode};
-use ast::expression::*;
+use crate::parser::{Parser, Parse, BindingPower, ANY, B0, B15};
+use crate::lexer::Token::*;
+use crate::ast::{Node, NodeList, Expression, ExpressionNode, IdentifierNode, ExpressionList};
+use crate::ast::{Property, PropertyKey, OperatorKind, Literal, Function, Class, StatementNode};
+use crate::ast::expression::*;
 
 
 type ExpressionHandler = for<'ast> fn(&mut Parser<'ast>) -> ExpressionNode<'ast>;
@@ -637,11 +637,11 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use ast::{OperatorKind, Literal, Statement, Function, Pattern, Class};
-    use ast::expression::*;
-    use ast::statement::*;
-    use parser::parse;
-    use parser::mock::Mock;
+    use crate::ast::{OperatorKind, Literal, Statement, Function, Pattern, Class};
+    use crate::ast::expression::*;
+    use crate::ast::statement::*;
+    use crate::parser::parse;
+    use crate::parser::mock::Mock;
 
     #[test]
     fn ident_expression() {

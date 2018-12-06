@@ -1,8 +1,8 @@
-use error::Error;
+use crate::error::Error;
 
-use ast::{Node, Loc, NodeList, Pattern};
-use ast::{Name, ClassMember, Property, PropertyKey, MandatoryName, Block};
-use parser::Parser;
+use crate::ast::{Node, Loc, NodeList, Pattern};
+use crate::ast::{Name, ClassMember, Property, PropertyKey, MandatoryName, Block};
+use crate::parser::Parser;
 
 pub trait Handle<'ast> {
     fn handle_error(parser: &mut Parser<'ast>, err: Error) -> Self;

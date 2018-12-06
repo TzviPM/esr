@@ -1,6 +1,6 @@
 use esr::ast::{Function, Class, ClassMember, Name, EmptyName, MandatoryName, OptionalName, MethodKind};
 
-use {ToCode, Generator};
+use crate::{ToCode, Generator};
 
 
 impl<G: Generator> ToCode<G> for EmptyName {
@@ -130,7 +130,7 @@ impl<'ast, G, N> ToCode<G> for Class<'ast, N> where
 
 #[cfg(test)]
 mod test {
-    use assert_min;
+    use crate::assert_min;
 
     #[test]
     fn function() {

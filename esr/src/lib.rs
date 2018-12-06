@@ -23,5 +23,5 @@ mod module;
 mod parser;
 mod astgen;
 
-pub use parser::parse;
-pub use module::Module;
+pub use crate::parser::parse;
+pub use crate::module::Module;

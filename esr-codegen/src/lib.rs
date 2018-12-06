@@ -14,9 +14,9 @@ pub trait Generator: Sized {
     type Output;
 
     fn consume(self) -> Self::Output;
-    fn write_byte(&mut self, u8);
-    fn write_bytes(&mut self, &[u8]);
-    fn write_pretty(&mut self, u8);
+    fn write_byte(&mut self, _: u8);
+    fn write_bytes(&mut self, _: &[u8]);
+    fn write_pretty(&mut self, _: u8);
 
     #[inline]
     fn write<T>(&mut self, item: &T) where

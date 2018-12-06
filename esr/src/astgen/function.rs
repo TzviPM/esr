@@ -1,7 +1,7 @@
 use serde::ser::{Serialize, Serializer, SerializeStruct};
-use astgen::SerializeInLoc;
-use ast::{Function, Class, Name, MandatoryName, OptionalName, EmptyName, ClassMember, Block};
-use ast::MethodKind;
+use crate::astgen::SerializeInLoc;
+use crate::ast::{Function, Class, Name, MandatoryName, OptionalName, EmptyName, ClassMember, Block};
+use crate::ast::MethodKind;
 
 impl<'ast> Serialize for MethodKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

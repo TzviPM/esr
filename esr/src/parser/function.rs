@@ -1,8 +1,8 @@
 use toolshed::list::ListBuilder;
-use parser::{Parser, Parse, ANY, B0};
-use lexer::Token::*;
-use ast::{Node, NodeList, EmptyName, OptionalName, MandatoryName, Name};
-use ast::{MethodKind, Pattern, Function, Class, ClassMember, PropertyKey};
+use crate::parser::{Parser, Parse, ANY, B0};
+use crate::lexer::Token::*;
+use crate::ast::{Node, NodeList, EmptyName, OptionalName, MandatoryName, Name};
+use crate::ast::{MethodKind, Pattern, Function, Class, ClassMember, PropertyKey};
 
 impl<'ast> Parse<'ast> for EmptyName {
     type Output = Self;
@@ -385,11 +385,11 @@ impl<'ast> Parser<'ast> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use parser::parse;
-    use parser::mock::Mock;
-    use ast::{NodeList, Literal, Expression, Function, Class};
-    use ast::{ClassMember, Pattern};
-    use ast::statement::*;
+    use crate::parser::parse;
+    use crate::parser::mock::Mock;
+    use crate::ast::{NodeList, Literal, Expression, Function, Class};
+    use crate::ast::{ClassMember, Pattern};
+    use crate::ast::statement::*;
 
     #[test]
     fn function_empty() {

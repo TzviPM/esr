@@ -1,7 +1,9 @@
-extern crate test;
+#![feature(test)]
+
 extern crate esr;
-extern crate toolshed;
 extern crate serde_json;
+extern crate test;
+extern crate toolshed;
 
 use test::Bencher;
 
@@ -99,7 +101,6 @@ fn parse_to_ast(b: &mut Bencher) {
     });
 }
 
-
 #[bench]
 fn tokenize(b: &mut Bencher) {
     let arena = toolshed::Arena::new();
@@ -122,7 +123,5 @@ fn serialize_to_json(b: &mut Bencher) {
 
     b.bytes = output.len() as u64;
 
-    b.iter(|| {
-        serde_json::to_string(&module).unwrap()
-    })
+    b.iter(|| serde_json::to_string(&module).unwrap())
 }

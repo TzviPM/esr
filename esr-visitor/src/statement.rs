@@ -1,7 +1,7 @@
 use esr::ast::{Node, Statement, StatementNode};
 use esr::ast::statement::*;
 
-use {Visitor, Visitable, ParentNode, ScopeKind, NoParent};
+use crate::{Visitor, Visitable, ParentNode, ScopeKind, NoParent};
 
 
 impl<'ast> Visitable<'ast> for StatementNode<'ast> {
@@ -79,10 +79,10 @@ impl<'ast> Visitable<'ast> for StatementNode<'ast> {
                 visitor.push_parent(ParentNode::from(self));
                 for_of.visit_with(visitor);
             },
-            Try(ref try) => {
-                visitor.on_try_statement(try, self);
+            Try(ref r#try) => {
+                visitor.on_try_statement(r#try, self);
                 visitor.push_parent(ParentNode::from(self));
-                try.visit_with(visitor);
+                r#try.visit_with(visitor);
             },
             Labeled(ref labeled) => {
                 visitor.on_labeled_statement(labeled, self);

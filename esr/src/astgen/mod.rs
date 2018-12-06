@@ -6,8 +6,8 @@ mod function;
 mod value;
 
 use serde::ser::{Serialize, Serializer, SerializeStruct};
-use ast::{Loc, Node};
-use module::Module;
+use crate::ast::{Loc, Node};
+use crate::module::Module;
 
 pub trait SerializeInLoc {
     #[inline]

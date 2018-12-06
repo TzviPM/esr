@@ -1,5 +1,5 @@
-use lexer::{util, ByteHandler};
-use lexer::token::Token::*;
+use crate::lexer::{util, ByteHandler};
+use crate::lexer::token::Token::*;
 
 macro_rules! match_label {
     ($lex:ident [$( $byte:expr )* => $token:expr]) => {

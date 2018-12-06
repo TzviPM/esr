@@ -1,5 +1,5 @@
-mod token;
 mod labels;
+mod token;
 mod util;
 
 pub use crate::lexer::token::*;
@@ -7,17 +7,17 @@ pub use crate::lexer::token::*;
 use crate::lexer::labels::*;
 use crate::lexer::token::Token::*;
 
-use std::str;
 use crate::error::Error;
+use std::str;
 use toolshed::Arena;
 
 macro_rules! expect_byte {
-    ($lex:ident) => ({
+    ($lex:ident) => {{
         match $lex.read_byte() {
             0 => return $lex.token = UnexpectedEndOfProgram,
-            _ => $lex.bump()
+            _ => $lex.bump(),
         }
-    });
+    }};
 }
 
 macro_rules! unwind_loop {
@@ -58,7 +58,7 @@ type ByteHandler = Option<for<'arena> fn(&mut Lexer<'arena>)>;
 
 /// Lookup table mapping any incoming byte to a handler function defined below.
 static BYTE_HANDLERS: [ByteHandler; 256] = [
-//   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F   //
+    //   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F   //
     EOF, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, // 0
     ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, // 1
     ___, EXL, QOT, ERR, IDT, PRC, AMP, QOT, PNO, PNC, ATR, PLS, COM, MIN, PRD, SLH, // 2
@@ -163,106 +163,96 @@ const BEC: ByteHandler = Some(|lex| {
 // =
 const EQL: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'=' => {
-            match lex.next_byte() {
-                b'=' => {
-                    lex.bump();
+        b'=' => match lex.next_byte() {
+            b'=' => {
+                lex.bump();
 
-                    OperatorStrictEquality
-                },
-
-                _ => OperatorEquality
+                OperatorStrictEquality
             }
+
+            _ => OperatorEquality,
         },
 
         b'>' => {
             lex.bump();
 
             OperatorFatArrow
-        },
+        }
 
-        _ => OperatorAssign
+        _ => OperatorAssign,
     };
 });
 
 // !
 const EXL: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'=' => {
-            match lex.next_byte() {
-                b'=' => {
-                    lex.bump();
+        b'=' => match lex.next_byte() {
+            b'=' => {
+                lex.bump();
 
-                    OperatorStrictInequality
-                },
-
-                _ => OperatorInequality
+                OperatorStrictInequality
             }
+
+            _ => OperatorInequality,
         },
 
-        _ => OperatorLogicalNot
+        _ => OperatorLogicalNot,
     };
 });
 
 // <
 const LSS: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'<' => {
-            match lex.next_byte() {
-                b'=' => {
-                    lex.bump();
+        b'<' => match lex.next_byte() {
+            b'=' => {
+                lex.bump();
 
-                    OperatorBSLAssign
-                },
-
-                _ => OperatorBitShiftLeft
+                OperatorBSLAssign
             }
+
+            _ => OperatorBitShiftLeft,
         },
 
         b'=' => {
             lex.bump();
 
             OperatorLesserEquals
-        },
+        }
 
-        _ => OperatorLesser
+        _ => OperatorLesser,
     };
 });
 
 // >
 const MOR: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'>' => {
-            match lex.next_byte() {
-                b'>' => {
-                    match lex.next_byte() {
-                        b'=' => {
-                            lex.bump();
-
-                            OperatorUBSRAssign
-                        }
-
-                        _ => OperatorUBitShiftRight
-                    }
-                },
-
+        b'>' => match lex.next_byte() {
+            b'>' => match lex.next_byte() {
                 b'=' => {
                     lex.bump();
 
-                    OperatorBSRAssign
-                },
+                    OperatorUBSRAssign
+                }
 
-                _ => OperatorBitShiftRight
+                _ => OperatorUBitShiftRight,
+            },
+
+            b'=' => {
+                lex.bump();
+
+                OperatorBSRAssign
             }
+
+            _ => OperatorBitShiftRight,
         },
 
         b'=' => {
             lex.bump();
 
             OperatorGreaterEquals
-        },
+        }
 
-        _ => OperatorGreater
+        _ => OperatorGreater,
     };
 });
 
@@ -287,9 +277,9 @@ const CRT: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorBitXorAssign
-        },
+        }
 
-        _ => OperatorBitwiseXor
+        _ => OperatorBitwiseXor,
     };
 });
 
@@ -300,15 +290,15 @@ const AMP: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorLogicalAnd
-        },
+        }
 
         b'=' => {
             lex.bump();
 
             OperatorBitAndAssign
-        },
+        }
 
-        _ => OperatorBitwiseAnd
+        _ => OperatorBitwiseAnd,
     };
 });
 
@@ -319,15 +309,15 @@ const PIP: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorLogicalOr
-        },
+        }
 
         b'=' => {
             lex.bump();
 
             OperatorBitOrAssign
-        },
+        }
 
-        _ => OperatorBitwiseOr
+        _ => OperatorBitwiseOr,
     };
 });
 
@@ -338,15 +328,15 @@ const PLS: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorIncrement
-        },
+        }
 
         b'=' => {
             lex.bump();
 
             OperatorAddAssign
-        },
+        }
 
-        _ => OperatorAddition
+        _ => OperatorAddition,
     };
 });
 
@@ -357,40 +347,38 @@ const MIN: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorDecrement
-        },
+        }
 
         b'=' => {
             lex.bump();
 
             OperatorSubtractAssign
-        },
+        }
 
-        _ => OperatorSubtraction
+        _ => OperatorSubtraction,
     };
 });
 
 // *
 const ATR: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'*' => {
-            match lex.next_byte() {
-                b'=' => {
-                    lex.bump();
+        b'*' => match lex.next_byte() {
+            b'=' => {
+                lex.bump();
 
-                    OperatorExponentAssign
-                },
-
-                _ => OperatorExponent
+                OperatorExponentAssign
             }
+
+            _ => OperatorExponent,
         },
 
         b'=' => {
             lex.bump();
 
             OperatorMultiplyAssign
-        },
+        }
 
-        _ => OperatorMultiplication
+        _ => OperatorMultiplication,
     };
 });
 
@@ -408,7 +396,7 @@ const SLH: ByteHandler = Some(|lex| {
                     _ => {}
                 }
             });
-        },
+        }
 
         // block comment
         b'*' => {
@@ -416,21 +404,19 @@ const SLH: ByteHandler = Some(|lex| {
             // Keep consuming bytes until */ happens in a row
             unwind_loop!({
                 match lex.read_byte() {
-                    b'*' => {
-                        match lex.next_byte() {
-                            b'/' => {
-                                lex.bump();
-                                return lex.consume();
-                            },
-                            0 => return lex.token = UnexpectedEndOfProgram,
-                            _ => {}
+                    b'*' => match lex.next_byte() {
+                        b'/' => {
+                            lex.bump();
+                            return lex.consume();
                         }
+                        0 => return lex.token = UnexpectedEndOfProgram,
+                        _ => {}
                     },
                     0 => return lex.token = UnexpectedEndOfProgram,
-                    _ => lex.bump()
+                    _ => lex.bump(),
                 }
             });
-        },
+        }
 
         b'=' => {
             lex.bump();
@@ -438,7 +424,7 @@ const SLH: ByteHandler = Some(|lex| {
             OperatorDivideAssign
         }
 
-        _ => OperatorDivision
+        _ => OperatorDivision,
     };
 });
 
@@ -449,9 +435,9 @@ const PRC: ByteHandler = Some(|lex| {
             lex.bump();
 
             OperatorRemainderAssign
-        },
+        }
 
-        _ => OperatorRemainder
+        _ => OperatorRemainder,
     };
 });
 
@@ -460,7 +446,11 @@ const UNI: ByteHandler = Some(|lex| {
     let start = lex.index;
 
     // TODO: unicodes with different lengths
-    let first = lex.slice_source(start, start + 4).chars().next().expect("Has to have one");
+    let first = lex
+        .slice_source(start, start + 4)
+        .chars()
+        .next()
+        .expect("Has to have one");
 
     if !first.is_alphanumeric() {
         return lex.token = UnexpectedToken;
@@ -482,19 +472,19 @@ const ZER: ByteHandler = Some(|lex| {
             lex.bump();
 
             return lex.read_binary();
-        },
+        }
 
         b'o' | b'O' => {
             lex.bump();
 
             return lex.read_octal();
-        },
+        }
 
         b'x' | b'X' => {
             lex.bump();
 
             return lex.read_hexadec();
-        },
+        }
 
         _ => {}
     }
@@ -503,12 +493,12 @@ const ZER: ByteHandler = Some(|lex| {
         match lex.read_byte() {
             b'0'..=b'9' => {
                 lex.bump();
-            },
+            }
             b'.' => {
                 lex.bump();
 
                 return lex.read_float();
-            },
+            }
             b'e' | b'E' => {
                 lex.bump();
 
@@ -525,20 +515,20 @@ const ZER: ByteHandler = Some(|lex| {
 const DIG: ByteHandler = Some(|lex| {
     unwind_loop!({
         match lex.next_byte() {
-            b'0'..=b'9' => {},
+            b'0'..=b'9' => {}
             b'.' => {
                 lex.bump();
 
                 return lex.read_float();
-            },
+            }
             b'e' | b'E' => {
                 lex.bump();
 
                 return lex.read_scientific();
-            },
+            }
             _ => {
                 return lex.token = LiteralNumber;
-            },
+            }
         }
     });
 });
@@ -550,7 +540,7 @@ const PRD: ByteHandler = Some(|lex| {
             lex.bump();
 
             lex.read_float()
-        },
+        }
 
         b'.' => {
             lex.token = match lex.next_byte() {
@@ -558,13 +548,13 @@ const PRD: ByteHandler = Some(|lex| {
                     lex.bump();
 
                     OperatorSpread
-                },
+                }
 
-                _ => UnexpectedToken
+                _ => UnexpectedToken,
             }
-        },
+        }
 
-        _ => lex.read_accessor()
+        _ => lex.read_accessor(),
     };
 });
 
@@ -579,15 +569,15 @@ const QOT: ByteHandler = Some(|lex| {
             ch if ch == style => {
                 lex.bump();
                 return lex.token = LiteralString;
-            },
+            }
             b'\\' => {
                 lex.bump();
                 expect_byte!(lex);
-            },
+            }
             0 => {
                 return lex.token = UnexpectedEndOfProgram;
-            },
-            _ => lex.bump()
+            }
+            _ => lex.bump(),
         }
     });
 });
@@ -618,7 +608,6 @@ pub struct Lexer<'arena> {
 
     pub quasi: &'arena str,
 }
-
 
 impl<'arena> Lexer<'arena> {
     /// Create a new `Lexer` from source using an existing arena.
@@ -749,7 +738,7 @@ impl<'arena> Lexer<'arena> {
                     self.token = TemplateClosed;
 
                     return;
-                },
+                }
                 b'$' => {
                     let end = self.index;
 
@@ -757,13 +746,13 @@ impl<'arena> Lexer<'arena> {
 
                     match self.read_byte() {
                         b'{' => self.bump(),
-                        _    => continue
+                        _ => continue,
                     }
 
                     self.quasi = self.slice_source(start, end);
                     self.token = TemplateOpen;
                     return;
-                },
+                }
                 b'\\' => {
                     self.bump();
 
@@ -771,11 +760,11 @@ impl<'arena> Lexer<'arena> {
                         0 => {
                             self.token = UnexpectedEndOfProgram;
                             return;
-                        },
-                        _ => self.bump()
+                        }
+                        _ => self.bump(),
                     }
-                },
-                _ => self.bump()
+                }
+                _ => self.bump(),
             }
         }
     }
@@ -799,7 +788,7 @@ impl<'arena> Lexer<'arena> {
             token,
             start,
             end,
-            raw: self.slice_source(start, end).to_owned().into_boxed_str()
+            raw: self.slice_source(start, end).to_owned().into_boxed_str(),
         }
     }
 
@@ -833,11 +822,11 @@ impl<'arena> Lexer<'arena> {
             match self.read_byte() {
                 b'0' => {
                     self.bump();
-                },
+                }
                 b'1' => {
                     self.bump();
-                },
-                _ => break
+                }
+                _ => break,
             }
         }
 
@@ -862,15 +851,15 @@ impl<'arena> Lexer<'arena> {
         const __: bool = false;
 
         static TABLE: [bool; 128] = [
-        // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-          __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 0
-          __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 1
-          __, __, __, __, DO, __, __, __, __, __, __, __, __, __, __, __, // 2
-          __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 3
-          __, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, // 4
-          AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, __, BS, __, __, US, // 5
-          __, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, // 6
-          AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, __, __, __, __, __, // 7
+            // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+            __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 0
+            __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 1
+            __, __, __, __, DO, __, __, __, __, __, __, __, __, __, __, __, // 2
+            __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, // 3
+            __, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, // 4
+            AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, __, BS, __, __, US, // 5
+            __, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, // 6
+            AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, AL, __, __, __, __, __, // 7
         ];
 
         let mut ch;
@@ -883,7 +872,7 @@ impl<'arena> Lexer<'arena> {
 
                 if ch > 127 {
                     unimplemented!();
-                    // return unicode(self)
+                // return unicode(self)
                 } else if TABLE[ch as usize] {
                     self.read_label();
                     return self.token = Accessor;
@@ -911,14 +900,10 @@ impl<'arena> Lexer<'arena> {
 
     #[inline]
     fn slice_source(&self, start: usize, end: usize) -> &'arena str {
-        use std::str::from_utf8_unchecked;
         use std::slice::from_raw_parts;
+        use std::str::from_utf8_unchecked;
 
-        unsafe {
-            from_utf8_unchecked(from_raw_parts(
-                self.ptr.add(start), end - start
-            ))
-        }
+        unsafe { from_utf8_unchecked(from_raw_parts(self.ptr.add(start), end - start)) }
     }
 
     #[inline]
@@ -936,9 +921,7 @@ impl<'arena> Lexer<'arena> {
     #[inline]
     fn read_hexadec(&mut self) {
         while match self.read_byte() {
-            b'0'..=b'9' |
-            b'a'..=b'f' |
-            b'A'..=b'F' => true,
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => true,
             _ => false,
         } {
             self.bump();
@@ -951,12 +934,12 @@ impl<'arena> Lexer<'arena> {
     fn read_float(&mut self) {
         loop {
             match self.read_byte() {
-                b'0'..=b'9'  => self.bump(),
-                b'e' | b'E'  => {
+                b'0'..=b'9' => self.bump(),
+                b'e' | b'E' => {
                     self.bump();
                     return self.read_scientific();
-                },
-                _            => break
+                }
+                _ => break,
             }
         }
 
@@ -967,7 +950,7 @@ impl<'arena> Lexer<'arena> {
     fn read_scientific(&mut self) {
         match self.read_byte() {
             b'-' | b'+' => self.bump(),
-            _           => {}
+            _ => {}
         }
 
         while match self.read_byte() {
@@ -986,35 +969,33 @@ impl<'arena> Lexer<'arena> {
         let mut in_class = false;
         loop {
             match self.read_byte() {
-                b'['  => {
+                b'[' => {
                     self.bump();
                     in_class = true;
-                },
-                b']'  => {
+                }
+                b']' => {
                     self.bump();
                     in_class = false;
-                },
-                b'/'  => {
+                }
+                b'/' => {
                     self.bump();
                     if !in_class {
                         break;
                     }
-                },
-                b'\\' => {
-                    match self.next_byte() {
-                        0 => {
-                            self.token = UnexpectedEndOfProgram;
-                            return "";
-                        },
-                        _ => self.bump()
+                }
+                b'\\' => match self.next_byte() {
+                    0 => {
+                        self.token = UnexpectedEndOfProgram;
+                        return "";
                     }
+                    _ => self.bump(),
                 },
                 b'\n' => {
                     self.bump();
                     self.token = UnexpectedToken;
                     return "";
-                },
-                _     => self.bump()
+                }
+                _ => self.bump(),
             }
         }
 
@@ -1022,8 +1003,8 @@ impl<'arena> Lexer<'arena> {
             match self.read_byte() {
                 b'g' | b'i' | b'm' | b'u' | b'y' => {
                     self.bump();
-                },
-                _                                => {
+                }
+                _ => {
                     break;
                 }
             }
@@ -1038,7 +1019,10 @@ impl<'arena> Lexer<'arena> {
 mod test {
     use super::*;
 
-    fn assert_lex<T>(source: &str, tokens: T) where T: AsRef<[(Token, &'static str)]> {
+    fn assert_lex<T>(source: &str, tokens: T)
+    where
+        T: AsRef<[(Token, &'static str)]>,
+    {
         let arena = Arena::new();
         let mut lex = Lexer::new(&arena, source);
 
@@ -1078,7 +1062,7 @@ mod test {
                 (ParenOpen, "("),
                 (ParenClose, ")"),
                 (Semicolon, ";"),
-            ]
+            ],
         );
     }
 
@@ -1092,7 +1076,7 @@ mod test {
                 (ParenOpen, "("),
                 (ParenClose, ")"),
                 (Semicolon, ";"),
-            ]
+            ],
         );
     }
 
@@ -1107,8 +1091,8 @@ mod test {
                 (LiteralNumber, "2"),
                 (OperatorAddition, "+"),
                 (LiteralNumber, "2"),
-                (Semicolon, ";")
-            ]
+                (Semicolon, ";"),
+            ],
         );
     }
 
@@ -1126,7 +1110,7 @@ mod test {
                 (OperatorAssign, "="),
                 (LiteralNumber, "42"),
                 (Semicolon, ";"),
-            ]
+            ],
         );
     }
 
@@ -1144,7 +1128,7 @@ mod test {
                 (Return, "return"),
                 (Identifier, "bar"),
                 (BraceClose, "}"),
-            ]
+            ],
         );
     }
 
@@ -1168,7 +1152,7 @@ mod test {
                 protected public return static super switch this throw
                 true try undefined typeof var void while with yield
             ",
-             &[
+            &[
                 (Break, "break"),
                 (Case, "case"),
                 (Class, "class"),
@@ -1211,7 +1195,7 @@ mod test {
                 (While, "while"),
                 (With, "with"),
                 (Yield, "yield"),
-            ][..]
+            ][..],
         );
     }
 
@@ -1223,7 +1207,7 @@ mod test {
                 >>> < <= > >= instanceof in === !== == != & ^ | && ||
                 ? = += -= **= *= /= %= <<= >>= >>>= &= ^= |= ...
             ",
-             &[
+            &[
                 (OperatorFatArrow, "=>"),
                 (OperatorNew, "new"),
                 (OperatorIncrement, "++"),
@@ -1272,7 +1256,47 @@ mod test {
                 (OperatorBitXorAssign, "^="),
                 (OperatorBitOrAssign, "|="),
                 (OperatorSpread, "..."),
-            ][..]
+            ][..],
+        );
+    }
+
+    #[test]
+    fn type_assertions() {
+        assert_lex(
+            "const foo: number = 2 + 2;",
+            &[
+                (DeclarationConst, "const"),
+                (Identifier, "foo"),
+                (Colon, ":"),
+                (KeywordNumber, "number"),
+                (OperatorAssign, "="),
+                (LiteralNumber, "2"),
+                (OperatorAddition, "+"),
+                (LiteralNumber, "2"),
+                (Semicolon, ";"),
+            ][..],
+        );
+    }
+
+    #[test]
+    fn typed_function() {
+        assert_lex(
+            "function isFoo(bar: string): boolean { return bar }",
+            &[
+                (Function, "function"),
+                (Identifier, "isFoo"),
+                (ParenOpen, "("),
+                (Identifier, "bar"),
+                (Colon, ":"),
+                (KeywordString, "string"),
+                (ParenClose, ")"),
+                (Colon, ":"),
+                (KeywordBoolean, "boolean"),
+                (BraceOpen, "{"),
+                (Return, "return"),
+                (Identifier, "bar"),
+                (BraceClose, "}"),
+            ][..],
         );
     }
 }

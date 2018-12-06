@@ -10,6 +10,7 @@
 // SUPER WITH  CONT  FOR   SWTCH YIELD DBGGR FUNCT THIS  DEFLT IF    THROW
 // IMPRT TRY   STATI TRUE  FALSE NULL  UNDEF STR   NUM   BIN   REGEX ENUM
 // IMPL  PCKG  PROT  IFACE PRIV  PUBLI IDENT ACCSS TPL_O TPL_C ERR_T ERR_E
+// KNUM  KSTR
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
@@ -37,7 +38,7 @@ pub enum Token {
     OperatorRemainder,        //   …  %  …
     OperatorExponent,         //   …  ** …
     OperatorAddition,         //   …  +  … | + …
-    OperatorSubtraction,     //   …  -  … | - …
+    OperatorSubtraction,      //   …  -  … | - …
     OperatorBitShiftLeft,     //   …  << …
     OperatorBitShiftRight,    //   …  >> …
     OperatorUBitShiftRight,   //   … >>> …
@@ -59,7 +60,7 @@ pub enum Token {
     OperatorConditional,      //   …  ?  …  :  …
     OperatorAssign,           //   …  =  …
     OperatorAddAssign,        //   …  += …
-    OperatorSubtractAssign,  //   …  -= …
+    OperatorSubtractAssign,   //   …  -= …
     OperatorExponentAssign,   //   … **= …
     OperatorMultiplyAssign,   //   …  *= …
     OperatorDivideAssign,     //   …  /= …
@@ -121,6 +122,9 @@ pub enum Token {
     TemplateClosed,
     UnexpectedToken,
     UnexpectedEndOfProgram,
+    KeywordNumber,
+    KeywordString,
+    KeywordBoolean,
 }
 
 impl Token {
@@ -129,44 +133,14 @@ impl Token {
         use self::Token::*;
 
         match self {
-            Identifier         |
-            Break              |
-            Do                 |
-            Case               |
-            Else               |
-            Catch              |
-            Export             |
-            Class              |
-            Extends            |
-            Return             |
-            While              |
-            Finally            |
-            Super              |
-            With               |
-            Continue           |
-            For                |
-            Switch             |
-            Yield              |
-            Debugger           |
-            Function           |
-            This               |
-            Default            |
-            If                 |
-            Throw              |
-            Import             |
-            Try                |
-            Static             |
-            OperatorNew        |
-            OperatorTypeof     |
-            OperatorVoid       |
-            OperatorDelete     |
-            OperatorInstanceof |
-            LiteralTrue        |
-            LiteralFalse       |
-            LiteralNull        |
-            LiteralUndefined   => true,
+            Identifier | Break | Do | Case | Else | Catch | Export | Class | Extends | Return
+            | While | Finally | Super | With | Continue | For | Switch | Yield | Debugger
+            | Function | This | Default | If | Throw | Import | Try | Static | OperatorNew
+            | OperatorTypeof | OperatorVoid | OperatorDelete | OperatorInstanceof | LiteralTrue
+            | LiteralFalse | LiteralNull | LiteralUndefined | KeywordNumber | KeywordString
+            | KeywordBoolean => true,
 
-            _                  => false,
+            _ => false,
         }
     }
 }

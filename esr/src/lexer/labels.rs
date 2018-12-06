@@ -1,5 +1,5 @@
-use crate::lexer::{util, ByteHandler};
 use crate::lexer::token::Token::*;
+use crate::lexer::{util, ByteHandler};
 
 macro_rules! match_label {
     ($lex:ident [$( $byte:expr )* => $token:expr]) => {
@@ -45,7 +45,10 @@ pub const IDT: ByteHandler = Some(|lex| {
 
 // Identifier or keyword starting with a letter `b`
 pub const L_B: ByteHandler = Some(|lex| {
-    match_label!(lex [b'r' b'e' b'a' b'k' => Break]);
+    match_label!(lex {
+        b'r'[b'e' b'a' b'k' => Break]
+        b'o'[b'o' b'l' b'e' b'a' b'n' => KeywordBoolean]
+    });
 
     lex.read_label();
     lex.token = Identifier;
@@ -146,8 +149,11 @@ pub const L_L: ByteHandler = Some(|lex| {
 // Identifier or keyword starting with a letter `n`
 pub const L_N: ByteHandler = Some(|lex| {
     match_label!(lex {
-        b'e'[b'w'      => OperatorNew]
-        b'u'[b'l' b'l' => LiteralNull]
+        b'e'[b'w'                => OperatorNew]
+        b'u'{
+            b'l'[ b'l'          => LiteralNull]
+            b'm'[b'b' b'e' b'r' => KeywordNumber]
+        }
     });
 
     lex.read_label();
@@ -182,7 +188,10 @@ pub const L_S: ByteHandler = Some(|lex| {
     match_label!(lex {
         b'u'[b'p' b'e' b'r'      => Super]
         b'w'[b'i' b't' b'c' b'h' => Switch]
-        b't'[b'a' b't' b'i' b'c' => Static]
+        b't'{
+            b'a'[b't' b'i' b'c' => Static]
+            b'r'[b'i' b'n' b'g' => KeywordString]
+        }
     });
 
     lex.read_label();

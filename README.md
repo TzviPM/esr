@@ -1,6 +1,6 @@
 # Esr _(Pronounced "esser")_
 
-[![Travis CI](https://travis-ci.org/tzvipm/esr.svg)](https://travis-ci.org/tzvipm/esr)
+[![Build Status](https://travis-ci.com/tzvipm/esr.svg?branch=master)](https://travis-ci.com/tzvipm/esr)
 [![Crates.io](https://img.shields.io/crates/v/esr.svg)](https://crates.io/crates/esr)
 
 **Esr** is a high performance toolchain for ECMAScript-style languages with a Rust core. Its goal is to make static analysis and compilation of ECMAScript-style languages more snappy.

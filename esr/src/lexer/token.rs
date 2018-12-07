@@ -125,6 +125,8 @@ pub enum Token {
     KeywordNumber,
     KeywordString,
     KeywordBoolean,
+    KeywordAsync,
+    KeywordAwait,
 }
 
 impl Token {
@@ -138,7 +140,7 @@ impl Token {
             | Function | This | Default | If | Throw | Import | Try | Static | OperatorNew
             | OperatorTypeof | OperatorVoid | OperatorDelete | OperatorInstanceof | LiteralTrue
             | LiteralFalse | LiteralNull | LiteralUndefined | KeywordNumber | KeywordString
-            | KeywordBoolean => true,
+            | KeywordBoolean | KeywordAsync | KeywordAwait => true,
 
             _ => false,
         }

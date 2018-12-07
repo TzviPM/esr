@@ -43,6 +43,17 @@ pub const IDT: ByteHandler = Some(|lex| {
     lex.token = Identifier;
 });
 
+// Identifier or keyword starting with a letter `a`
+pub const L_A: ByteHandler = Some(|lex| {
+    match_label!(lex {
+        b's'[b'y' b'n' b'c' => KeywordAsync]
+        b'w'[b'a' b'i' b't' => KeywordAwait]
+    });
+
+    lex.read_label();
+    lex.token = Identifier;
+});
+
 // Identifier or keyword starting with a letter `b`
 pub const L_B: ByteHandler = Some(|lex| {
     match_label!(lex {

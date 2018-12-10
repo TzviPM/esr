@@ -1,4 +1,4 @@
-use ast::{Loc, TypeNode, TypeList};
+use crate::ast::{Loc, TypeList, TypeNode};
 
 static TYPE_ANY: &Loc<Type<'static>> = &Loc {
     start: 0,
@@ -26,5 +26,5 @@ pub enum Type<'ast> {
     Generic {
         ident: &'ast str,
         subtypes: TypeList<'ast>,
-    }
+    },
 }

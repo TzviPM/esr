@@ -114,6 +114,13 @@ pub enum ArrowBody<'ast> {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct ArrowExpression<'ast> {
+    pub is_async: bool,
+    pub params: NodeList<'ast, Pattern<'ast>>,
+    pub body: ArrowBody<'ast>,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct AsyncArrowExpression<'ast> {
     pub params: NodeList<'ast, Pattern<'ast>>,
     pub body: ArrowBody<'ast>,
 }

@@ -66,7 +66,7 @@ impl<'ast, N> Parse<'ast> for Function<'ast, N> where
 
     #[inline]
     fn parse(par: &mut Parser<'ast>) -> Self::Output {
-        let generator: bool = if par.lexer.token == OperatorMultiplication {
+        let is_generator: bool = if par.lexer.token == Asterisk {
             par.lexer.consume();
             true
         } else {
@@ -77,7 +77,8 @@ impl<'ast, N> Parse<'ast> for Function<'ast, N> where
 
         Function {
             name,
-            generator,
+            is_generator,
+            is_async: false,
             params: par.params(),
             body: par.block(),
         }
@@ -267,7 +268,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     fn pattern_assign(&mut self, left: Node<'ast, Pattern<'ast>>) -> Node<'ast, Pattern<'ast>> {
         match self.lexer.token {
-            OperatorAssign => {
+            Assign => {
                 self.lexer.consume();
 
                 let right = self.expression::<B0>();
@@ -329,7 +330,7 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn params(&mut self) -> NodeList<'ast, Pattern<'ast>> {
+    pub fn params(&mut self) -> NodeList<'ast, Pattern<'ast>> {
         expect!(self, ParenOpen);
 
         let item = match self.lexer.token {
@@ -338,7 +339,7 @@ impl<'ast> Parser<'ast> {
 
                 return NodeList::empty();
             },
-            OperatorSpread => return NodeList::from(self.arena, self.rest_element()),
+            RestSpread => return NodeList::from(self.arena, self.rest_element()),
             _              => self.pattern_param()
         };
 
@@ -367,7 +368,7 @@ impl<'ast> Parser<'ast> {
 
                     break;
                 },
-                OperatorSpread => {
+                RestSpread => {
                     builder.push(self.arena, self.rest_element());
 
                     break;

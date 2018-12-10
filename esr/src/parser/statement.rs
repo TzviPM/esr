@@ -11,10 +11,9 @@ use crate::ast::statement::{DeclarationStatement, ForStatement, ForInStatement, 
 use crate::ast::statement::{SwitchStatement, SwitchCase, LabeledStatement, ForInit};
 use crate::ast::OperatorKind::*;
 
-
 type StatementHandler = for<'ast> fn(&mut Parser<'ast>) -> StatementNode<'ast>;
 
-static STMT_HANDLERS: [StatementHandler; 108] = [
+static STMT_HANDLERS: [StatementHandler; 113] = [
     ____, EMPT, ____, ____, PRN,  ____, ARR,  ____, BLCK, ____, ____, NEW,
 //  EOF   ;     :     ,     (     )     [     ]     {     }     =>    NEW
 
@@ -41,6 +40,9 @@ static STMT_HANDLERS: [StatementHandler; 108] = [
 
     ____, ____, ____, ____, ____, ____, LABL, ____, TPLE, TPLS, ____, ____,
 //  IMPL  PCKG  PROT  IFACE PRIV  PUBLI IDENT ACCSS TPL_O TPL_C ERR_T ERR_E
+
+    ____, ____, ____, AFUN, ____,
+//  KNUM  KSTR  KBOOL ASYNC AWAIT
 ];
 
 
@@ -81,6 +83,7 @@ create_handlers! {
     const THRW = |par| par.throw_statement();
     const CONT = |par| par.continue_statement();
     const FUNC = |par| par.function_statement();
+    const AFUN = |par| par.async_function_statement();
     const CLAS = |par| par.class_statement();
     const IF   = |par| par.if_statement();
     const WHL  = |par| par.while_statement();
@@ -215,8 +218,17 @@ impl<'ast> Parser<'ast> {
     #[inline]
     pub fn function_statement(&mut self) -> StatementNode<'ast> {
         let start = self.lexer.start_then_consume();
-        let function = Function::parse(self);
+        let function = Function::parse(self, false);
 
+        self.alloc_at_loc(start, function.body.end, function)
+    }
+
+    #[inline]
+    pub fn async_statement(&mut self) -> StatementNode<'ast> {
+        let start = self.lexer.start_then_consume();
+        expect!(self, Function);
+        let function = Function::parse(self, true);
+        
         self.alloc_at_loc(start, function.body.end, function)
     }
 

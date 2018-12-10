@@ -66,61 +66,6 @@ use self::OperatorKind::*;
 
 impl OperatorKind {
     #[inline]
-    pub fn from_token(token: Token) -> Option<OperatorKind> {
-        match token {
-            OperatorFatArrow         => Some(FatArrow),
-            OperatorNew              => Some(New),
-            OperatorIncrement        => Some(Increment),
-            OperatorDecrement        => Some(Decrement),
-            OperatorLogicalNot       => Some(LogicalNot),
-            OperatorBitwiseNot       => Some(BitwiseNot),
-            OperatorTypeof           => Some(Typeof),
-            OperatorVoid             => Some(Void),
-            OperatorDelete           => Some(Delete),
-            OperatorMultiplication   => Some(Multiplication),
-            OperatorDivision         => Some(Division),
-            OperatorRemainder        => Some(Remainder),
-            OperatorExponent         => Some(Exponent),
-            OperatorAddition         => Some(Addition),
-            OperatorSubtraction      => Some(Subtraction),
-            OperatorBitShiftLeft     => Some(BitShiftLeft),
-            OperatorBitShiftRight    => Some(BitShiftRight),
-            OperatorUBitShiftRight   => Some(UBitShiftRight),
-            OperatorLesser           => Some(Lesser),
-            OperatorLesserEquals     => Some(LesserEquals),
-            OperatorGreater          => Some(Greater),
-            OperatorGreaterEquals    => Some(GreaterEquals),
-            OperatorInstanceof       => Some(Instanceof),
-            OperatorIn               => Some(In),
-            OperatorStrictEquality   => Some(StrictEquality),
-            OperatorStrictInequality => Some(StrictInequality),
-            OperatorEquality         => Some(Equality),
-            OperatorInequality       => Some(Inequality),
-            OperatorBitwiseAnd       => Some(BitwiseAnd),
-            OperatorBitwiseXor       => Some(BitwiseXor),
-            OperatorBitwiseOr        => Some(BitwiseOr),
-            OperatorLogicalAnd       => Some(LogicalAnd),
-            OperatorLogicalOr        => Some(LogicalOr),
-            OperatorConditional      => Some(Conditional),
-            OperatorAssign           => Some(Assign),
-            OperatorAddAssign        => Some(AddAssign),
-            OperatorSubtractAssign   => Some(SubtractAssign),
-            OperatorExponentAssign   => Some(ExponentAssign),
-            OperatorMultiplyAssign   => Some(MultiplyAssign),
-            OperatorDivideAssign     => Some(DivideAssign),
-            OperatorRemainderAssign  => Some(RemainderAssign),
-            OperatorBSLAssign        => Some(BSLAssign),
-            OperatorBSRAssign        => Some(BSRAssign),
-            OperatorUBSRAssign       => Some(UBSRAssign),
-            OperatorBitAndAssign     => Some(BitAndAssign),
-            OperatorBitXorAssign     => Some(BitXorAssign),
-            OperatorBitOrAssign      => Some(BitOrAssign),
-            OperatorSpread           => Some(Spread),
-            _                        => None
-        }
-    }
-
-    #[inline]
     pub fn as_str(&self) -> &'static str {
         match self {
             FatArrow         => "=>",
@@ -175,7 +120,7 @@ impl OperatorKind {
     }
 
     /// According to the Operator Precedence Table
-    /// Note: Unary operators default to 15!
+    /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
     #[inline]
     pub fn binding_power(&self) -> u8 {
         match self {

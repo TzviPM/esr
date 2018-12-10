@@ -1,132 +1,130 @@
-// Lookup table layout:
-// ====================
-//
-// EOF   ;     :     ,     (     )     [     ]     {     }     =>    NEW
-// ++    --    !     ~     TYPOF VOID  DELET *     /     %     **    +
-// -     <<    >>    >>>   <     <=    >     >=    INSOF IN    ===   !==
-// ==    !=    &     ^     |     &&    ||    ?     =     +=    -=    **=
-// *=    /=    %=    <<=   >>=   >>>=  &=    ^=    |=    ...   VAR   LET
-// CONST BREAK DO    CASE  ELSE  CATCH EXPRT CLASS EXTND RET   WHILE FINLY
-// SUPER WITH  CONT  FOR   SWTCH YIELD DBGGR FUNCT THIS  DEFLT IF    THROW
-// IMPRT TRY   STATI TRUE  FALSE NULL  UNDEF STR   NUM   BIN   REGEX ENUM
-// IMPL  PCKG  PROT  IFACE PRIV  PUBLI IDENT ACCSS TPL_O TPL_C ERR_T ERR_E
-// KNUM  KSTR
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum LiteralType {
+    True,
+    False,
+    Null,
+    Undefined,
+    String,
+    Number,
+    RegEx,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum TypeName {
+    Number,
+    String,
+    Boolean,
+    Any,
+    Never,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum KeywordName {
+    Async,
+    Await,
+    Break,
+    Case,
+    Catch,
+    Class,
+    Const,
+    Continue,
+    Debugger,
+    Default,
+    Do,
+    Else,
+    Enum,
+    Export,
+    Extends,
+    Finally,
+    For,
+    Function,
+    Get,
+    If,
+    Implements,
+    Import,
+    Interface,
+    Let,
+    Package,
+    Private,
+    Protected,
+    Public,
+    Return,
+    Set,
+    Static,
+    Super,
+    Switch,
+    This,
+    Throw,
+    Try,
+    Var,
+    While,
+    With,
+    Yield,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum CommentType {
+    SingleLine,
+    MultiLine,
+}
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     EndOfProgram,
-    Semicolon,
-    Colon,
-    Comma,
-    ParenOpen,
-    ParenClose,
-    BracketOpen,
-    BracketClose,
-    BraceOpen,
-    BraceClose,
-    OperatorFatArrow,         //   …  => …
-    OperatorNew,              //     new …
-    OperatorIncrement,        //      ++ … | … ++
-    OperatorDecrement,        //      -- … | … --
-    OperatorLogicalNot,       //       ! …
-    OperatorBitwiseNot,       //       ~ …
-    OperatorTypeof,           //  typeof …
-    OperatorVoid,             //    void …
-    OperatorDelete,           //  delete …
-    OperatorMultiplication,   //   …  *  …
-    OperatorDivision,         //   …  /  …
-    OperatorRemainder,        //   …  %  …
-    OperatorExponent,         //   …  ** …
-    OperatorAddition,         //   …  +  … | + …
-    OperatorSubtraction,      //   …  -  … | - …
-    OperatorBitShiftLeft,     //   …  << …
-    OperatorBitShiftRight,    //   …  >> …
-    OperatorUBitShiftRight,   //   … >>> …
-    OperatorLesser,           //   …  <  …
-    OperatorLesserEquals,     //   …  <= …
-    OperatorGreater,          //   …  >  …
-    OperatorGreaterEquals,    //   …  >= …
-    OperatorInstanceof,       //   … instanceof …
-    OperatorIn,               //   …  in …
-    OperatorStrictEquality,   //   … === …
-    OperatorStrictInequality, //   … !== …
-    OperatorEquality,         //   …  == …
-    OperatorInequality,       //   …  != …
-    OperatorBitwiseAnd,       //   …  &  …
-    OperatorBitwiseXor,       //   …  ^  …
-    OperatorBitwiseOr,        //   …  |  …
-    OperatorLogicalAnd,       //   …  && …
-    OperatorLogicalOr,        //   …  || …
-    OperatorConditional,      //   …  ?  …  :  …
-    OperatorAssign,           //   …  =  …
-    OperatorAddAssign,        //   …  += …
-    OperatorSubtractAssign,   //   …  -= …
-    OperatorExponentAssign,   //   … **= …
-    OperatorMultiplyAssign,   //   …  *= …
-    OperatorDivideAssign,     //   …  /= …
-    OperatorRemainderAssign,  //   …  %= …
-    OperatorBSLAssign,        //   … <<= …
-    OperatorBSRAssign,        //   … >>= …
-    OperatorUBSRAssign,       //   … >>>= …
-    OperatorBitAndAssign,     //   …  &= …
-    OperatorBitXorAssign,     //   …  ^= …
-    OperatorBitOrAssign,      //   …  |= …
-    OperatorSpread,           //     ... …
-    DeclarationVar,
-    DeclarationLet,
-    DeclarationConst,
-    Break,
-    Do,
-    Case,
-    Else,
-    Catch,
-    Export,
-    Class,
-    Extends,
-    Return,
-    While,
-    Finally,
-    Super,
-    With,
-    Continue,
-    For,
-    Switch,
-    Yield,
-    Debugger,
-    Function,
-    This,
-    Default,
-    If,
-    Throw,
-    Import,
-    Try,
-    Static,
-    LiteralTrue,
-    LiteralFalse,
-    LiteralNull,
-    LiteralUndefined,
-    LiteralString,
-    LiteralNumber,
-    LiteralBinary,
-    LiteralRegEx,
-    ReservedEnum,
-    ReservedImplements,
-    ReservedPackage,
-    ReservedProtected,
-    ReservedInterface,
-    ReservedPrivate,
-    ReservedPublic,
     Identifier,
-    Accessor,
-    TemplateOpen,
-    TemplateClosed,
+    Comment(CommentType),
+    Literal(LiteralType),
+    Type(TypeName),
+    Keyword(KeywordName),
+    Semicolon,        //      ;
+    Colon,            //      :
+    Comma,            //      ,
+    QuestionMark,     //      ?
+    ParenOpen,        //      (
+    ParenClose,       //      )
+    BracketOpen,      //      [
+    BracketClose,     //      ]
+    BraceOpen,        //      {
+    BraceClose,       //      }
+    Lesser,           //      <
+    Greater,          //      >
+    FatArrow,         //      =>
+    New,              //      new
+    Increment,        //      ++
+    Decrement,        //      --
+    Exclamation,      //      !
+    Tilde,            //      ~
+    Typeof,           //      typeof
+    Void,             //      void
+    Delete,           //      delete
+    Asterisk,         //      *
+    ForwardSlash,     //      /
+    Remainder,        //      %
+    Exponent,         //      **
+    Plus,             //      +
+    Minus,            //      -
+    Instanceof,       //      instanceof
+    In,               //      in
+    Of,               //      of
+    As,               //      as
+    StrictEquality,   //      ===
+    StrictInequality, //      !==
+    Equality,         //      ==
+    Inequality,       //      !=
+    Ampersand,        //      &
+    Caret,            //      ^
+    Pipe,             //      |
+    LogicalAnd,       //      &&
+    LogicalOr,        //      ||
+    Assign,           //      =
+    Dot,              //      .
+    RestSpread,       //      ...
+    At,               //      @
+    Hash,             //      #
+    TemplateOpen,     //      ` … ` or ` … ${
+    TemplateClosed,   //       … `
     UnexpectedToken,
     UnexpectedEndOfProgram,
-    KeywordNumber,
-    KeywordString,
-    KeywordBoolean,
-    KeywordAsync,
-    KeywordAwait,
 }
 
 impl Token {
@@ -135,13 +133,9 @@ impl Token {
         use self::Token::*;
 
         match self {
-            Identifier | Break | Do | Case | Else | Catch | Export | Class | Extends | Return
-            | While | Finally | Super | With | Continue | For | Switch | Yield | Debugger
-            | Function | This | Default | If | Throw | Import | Try | Static | OperatorNew
-            | OperatorTypeof | OperatorVoid | OperatorDelete | OperatorInstanceof | LiteralTrue
-            | LiteralFalse | LiteralNull | LiteralUndefined | KeywordNumber | KeywordString
-            | KeywordBoolean | KeywordAsync | KeywordAwait => true,
-
+            Identifier | New | Typeof | Void | Delete | Instanceof | In | Of | As => true,
+            Keyword(kw) => true,
+            Type(t) => true,
             _ => false,
         }
     }

@@ -1,69 +1,77 @@
 use toolshed::list::ListBuilder;
 use crate::parser::{Parser, Parse, BindingPower, ANY, B0, B15};
+use crate::lexer::{Token, KeywordName, LiteralType, TypeName};
 use crate::lexer::Token::*;
 use crate::ast::{Node, NodeList, Expression, ExpressionNode, IdentifierNode, ExpressionList};
 use crate::ast::{Property, PropertyKey, OperatorKind, Literal, Function, Class, StatementNode};
 use crate::ast::expression::*;
 
-
 type ExpressionHandler = for<'ast> fn(&mut Parser<'ast>) -> ExpressionNode<'ast>;
 
-pub type Context = &'static [ExpressionHandler; 108];
+pub enum Context {
+    Definition,
+    Array,
+    Call
+}
 
-static DEF_CONTEXT: Context = &[
-    ____, ____, ____, ____, PRN,  ____, ARR,  ____, OBJ,  ____, ____, NEW,
-//  EOF   ;     :     ,     (     )     [     ]     {     }     =>    NEW
+fn keywordHandler(kw: KeywordName) -> ExpressionHandler {
+    match kw {
+        Class => CLAS,
+        Function => FUNC,
+        // Async => ASFE,
+        // Await => AWAI,
+        This => THIS,
+        _ => ____,
+    }
+}
 
-    OP,   OP,   OP,   OP,   OP,   OP,   OP,   ____, REG,  ____, ____, OP,
-//  ++    --    !     ~     TYPOF VOID  DELET *     /     %     **    +
+fn literalHandler(lit: LiteralType) -> ExpressionHandler {
+    match lit {
+        True => TRUE,
+        False => FALS,
+        Null => NULL,
+        Undefined => UNDE,
+        String => STR,
+        Number => NUM,
+        RegEx => REGX,
 
-    OP,   ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-//  -     <<    >>    >>>   <     <=    >     >=    INSOF IN    ===   !==
+    }
+}
 
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-//  ==    !=    &     ^     |     &&    ||    ?     =     +=    -=    **=
+// ex. <> in `const a = <>`
+fn definitionHandler(tok: Token) -> ExpressionHandler {
+    match tok {
+        Identifier => IDEN,
+        Comment => CMNT,
+        ParenOpen => PRN,
+        BracketOpen => ARR,
+        BraceOpen => OBJ,
+        New => NEW,
+        Increment | Decrement | Exclamation | Tilde | Typeof | Void | Delete | Plus | Minus => OP,
+        TemplateOpen => TPLE,
+        TemplateClosed => TPLS,
+        Keyword(kw) => keywordHandler(kw),
+        Literal(lit) => literalHandler(lit),
+        Type(t) => IDEN,
+        _ => ____,
+    }
+}
 
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-//  *=    /=    %=    <<=   >>=   >>>=  &=    ^=    |=    ...   VAR   LET
+// ex <> in `[<>]`
+fn arrayHandler(tok: Token) -> ExpressionHandler {
+    match tok {
+        RestSpread => SPRD,
+        _ => definitionHandler(tok),
+    }
+}
 
-    ____, ____, ____, ____, ____, ____, ____, CLAS, ____, ____, ____, ____,
-//  CONST BREAK DO    CASE  ELSE  CATCH EXPRT CLASS EXTND RET   WHILE FINLY
-
-    ____, ____, ____, ____, ____, ____, ____, FUNC, THIS, ____, ____, ____,
-//  SUPER WITH  CONT  FOR   SWTCH YIELD DBGGR FUNCT THIS  DEFLT IF    THROW
-
-    ____, ____, ____, TRUE, FALS, NULL, UNDE, STR,  NUM,  BIN,  ____, ____,
-//  IMPRT TRY   STATI TRUE  FALSE NULL  UNDEF STR   NUM   BIN   REGEX ENUM
-
-    ____, ____, ____, ____, ____, ____, IDEN, ____, TPLE, TPLS, ____, ____,
-//  IMPL  PCKG  PROT  IFACE PRIV  PUBLI IDENT ACCSS TPL_O TPL_C ERR_T ERR_E
-];
-
-// Adds handlers for VoidExpression and SpreadExpression
-pub static ARRAY_CONTEXT: Context = &[
-    ____, ____, ____, VOID, PRN,  ____, ARR,  VOID, OBJ,  ____, ____, NEW,
-    OP,   OP,   OP,   OP,   OP,   OP,   OP,   ____, REG,  ____, ____, OP,
-    OP,   ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, SPRD, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, CLAS, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, FUNC, THIS, ____, ____, ____,
-    ____, ____, ____, TRUE, FALS, NULL, UNDE, STR,  NUM,  BIN,  ____, ____,
-    ____, ____, ____, ____, ____, ____, IDEN, ____, TPLE, TPLS, ____, ____,
-];
-
-// Adds handler for SpreadExpression
-pub static CALL_CONTEXT: Context = &[
-    ____, ____, ____, ____, PRN,  ____, ARR,  ____, OBJ,  ____, ____, NEW,
-    OP,   OP,   OP,   OP,   OP,   OP,   OP,   ____, REG,  ____, ____, OP,
-    OP,   ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, ____, ____, SPRD, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, CLAS, ____, ____, ____, ____,
-    ____, ____, ____, ____, ____, ____, ____, FUNC, THIS, ____, ____, ____,
-    ____, ____, ____, TRUE, FALS, NULL, UNDE, STR,  NUM,  BIN,  ____, ____,
-    ____, ____, ____, ____, ____, ____, IDEN, ____, TPLE, TPLS, ____, ____,
-];
+// ex <> in `fn(<>)`
+fn callHandler(tok: Token) -> ExpressionHandler {
+    match tok {
+        RestSpread => SPRD,
+        _ => definitionHandler(tok),
+    }
+}
 
 macro_rules! create_handlers {
     ($( const $name:ident = |$par:ident| $code:expr; )* $( pub const $pname:ident = |$ppar:ident| $pcode:expr; )*) => {
@@ -100,6 +108,12 @@ create_handlers! {
         let loc = par.lexer.start();
         par.error::<()>();
         par.alloc_at_loc(loc, loc, Expression::Void)
+    };
+
+    const CMNT = |par| {
+        par.lexer.consume();
+        let expr = par.expression_in_context::<B0>(Context::Call);
+        expr
     };
 
     const VOID = |par| par.void_expression();
@@ -146,7 +160,7 @@ create_handlers! {
 
         par.lexer.consume();
 
-        if par.lexer.token == Accessor {
+        if par.lexer.token == Dot {
             let meta = par.alloc_at_loc(start, op_end, "new");
             let expression = par.meta_property_expression(meta);
             let end = par.lexer.end();
@@ -165,7 +179,7 @@ create_handlers! {
 
     pub const ARR = |par| par.array_expression();
 
-    pub const REG = |par| par.regular_expression();
+    pub const REGX = |par| par.regular_expression();
 
     pub const TRUE = |par| {
         let expr = par.alloc_in_loc(Literal::True);
@@ -237,12 +251,18 @@ create_handlers! {
 impl<'ast> Parser<'ast> {
     #[inline]
     fn bound_expression(&mut self) -> ExpressionNode<'ast> {
-        unsafe { (*(DEF_CONTEXT as *const ExpressionHandler).offset(self.lexer.token as isize))(self) }
+        return definitionHandler(self.lexer.token)(self);
     }
 
     #[inline]
     fn context_bound_expression(&mut self, context: Context) -> ExpressionNode<'ast> {
-        unsafe { (*(context as *const ExpressionHandler).offset(self.lexer.token as isize))(self) }
+        let tok = self.lexer.token;
+        let handler = match context {
+            Context::Call => callHandler,
+            Context::Array => arrayHandler,
+            Context::Definition => definitionHandler,
+        };
+        return handler(tok)(self);
     }
 
     #[inline]
@@ -275,6 +295,7 @@ impl<'ast> Parser<'ast> {
         };
 
         ArrowExpression {
+            is_async: false,
             params,
             body,
         }
@@ -286,7 +307,7 @@ impl<'ast> Parser<'ast> {
             return NodeList::empty();
         }
 
-        let expression = self.expression_in_context::<B0>(CALL_CONTEXT);
+        let expression = self.expression_in_context::<B0>(Context::Call);
         let builder = ListBuilder::new(self.arena, expression);
 
         loop {
@@ -299,7 +320,7 @@ impl<'ast> Parser<'ast> {
                         break
                     }
 
-                    self.expression_in_context::<B0>(CALL_CONTEXT)
+                    self.expression_in_context::<B0>(Context::Call)
                 }
                 _ => {
                     self.error::<()>();
@@ -421,18 +442,9 @@ impl<'ast> Parser<'ast> {
                 let end = self.lexer.end();
                 return self.alloc_at_loc(start, end, Property::Spread { argument });
             },
-            LiteralString |
-            LiteralNumber => {
+            Literal(LiteralType::String) | Literal(LiteralType::Number) => {
                 let num = self.lexer.token_as_str();
                 let key = self.alloc_in_loc(PropertyKey::Literal(num));
-
-                self.lexer.consume();
-
-                key
-            },
-            LiteralBinary => {
-                let num = self.lexer.token_as_str();
-                let key = self.alloc_in_loc(PropertyKey::Binary(num));
 
                 self.lexer.consume();
 
@@ -476,7 +488,7 @@ impl<'ast> Parser<'ast> {
     #[inline]
     pub fn array_expression(&mut self) -> ExpressionNode<'ast> {
         let start = self.lexer.start_then_consume();
-        let body = self.array_elements(|par| par.expression_in_context::<B0>(ARRAY_CONTEXT));
+        let body = self.array_elements(|par| par.expression_in_context::<B0>(Context::Array));
         let end = self.lexer.end_then_consume();
 
         self.alloc_at_loc(start, end, ArrayExpression { body })
@@ -615,6 +627,24 @@ impl<'ast> Parser<'ast> {
             tag,
             quasi,
         })
+    }
+
+    #[inline]
+    pub fn async_function_expression(&mut self) -> ExpressionNode<'ast> {
+        let start = self.lexer.start_then_consume();
+        if self.lexer.token == Keyword(KeywordName::Function) {
+            self.lexer.consume();
+            let function = Function::parse(self);
+            function.is_async = true;
+            return self.alloc_at_loc(start, function.body.end, function);
+        } else {
+            let params = self.params();
+            expect!(self, OperatorFatArrow);
+            let arrowFunction = self.arrow_function_expression(params);
+            arrowFunction.is_async = true;
+            let end = self.lexer.end();
+            return self.alloc_at_loc(start, end, arrowFunction);
+        }
     }
 
     #[inline]
@@ -1032,7 +1062,8 @@ mod test {
 
         let expected = Function {
             name: None.into(),
-            generator: false,
+            is_generator: false,
+            is_async: false,
             params: NodeList::empty(),
             body: mock.empty_block()
         };
@@ -1047,7 +1078,8 @@ mod test {
 
         let expected = Function {
             name: mock.name("foo"),
-            generator: false,
+            is_generator: false,
+            is_async: false,
             params: NodeList::empty(),
             body: mock.empty_block()
         };
@@ -1062,6 +1094,7 @@ mod test {
 
         let expected = ArrowExpression {
             params: NodeList::empty(),
+            is_async: false,
             body: ArrowBody::Expression(mock.ptr("bar")),
         };
         assert_expr!(src, expected);
@@ -1076,7 +1109,7 @@ mod test {
             params: mock.list([
                 Pattern::Identifier("n")
             ]),
-
+            is_async: false,
             body: ArrowBody::Expression(mock.ptr(BinaryExpression {
                 operator: OperatorKind::Multiplication,
                 left: mock.ptr("n"),
@@ -1098,6 +1131,7 @@ mod test {
                 Pattern::Identifier("b"),
                 Pattern::Identifier("c")
             ]),
+            is_async: false,
             body: ArrowBody::Expression(mock.ptr("bar"))
         };
         assert_expr!(src, expected);
@@ -1122,6 +1156,7 @@ mod test {
                     right: mock.number("2")
                 }
             ]),
+            is_async: false,
             body: ArrowBody::Expression(mock.ptr("bar"))
         };
         assert_expr!(src, expected);
@@ -1200,6 +1235,7 @@ mod test {
             body: mock.list([
                 Expression::Arrow(ArrowExpression {
                     params: NodeList::empty(),
+                    is_async: false,
                     body: ArrowBody::Block(mock.ptr(BlockStatement {
                         body: NodeList::empty()
                     }))

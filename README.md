@@ -12,6 +12,30 @@ This repo is managed as a virtual workspace:
 - `esr-wasm` contains code for wasm compilation of Esr.
 - `ffi` contains the Node.js wrapper around the Rust core with [Neon](http://neon.rustbridge.io/) bindings.
 
+## Features
+
+### Lexer
+
+- Emits generic symbol names (ex. `QuestionMark` instead of `ConditionalOperator`) to facilitate abstraction of new language features (ex. optional chaining).
+
+- Supports syntax for tc39 proposals:
+
+  - Decorators
+  - Optional Chaining
+  - Private methods and fields (including static)
+  - Numeric separators
+
+  **Note** the stage 1 proposal for numeric extensions presents an ambiguity regarding numeric separators
+  Until a solution is presented to the tc39 committee in May 2019, we have elected not to support numeric
+  extensions at this time.
+
+- Only joins symbols that are guaranteed to go together, for example:
+
+  - no `>=` symbol, because of ambiguity with type lists such as `const a:SomeInterface<TypeArg>=value;`
+  - no `>>=` or `>>>=` symbols, because of ambiguity with embedded type lists
+
+  **Note** for consistency, we have omitted both the `<=` and `>=` symbols, all bitshift operators, and all compound assignment operators from our lexicon. These must be handled by parsers as multiple tokens.
+
 ## Performance
 
 Here are the latest benchmarks using `Esr`'s `ffi` library:

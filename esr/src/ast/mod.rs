@@ -1,7 +1,7 @@
 #[macro_use]
 mod variable;
 mod operator;
-// mod types;
+pub mod types;
 mod function;
 mod literal;
 pub mod node;
@@ -14,7 +14,7 @@ use std::ops::Deref;
 pub use crate::ast::variable::*;
 pub use crate::ast::operator::*;
 pub use crate::ast::node::Node;
-// pub use ast::types::{Type, Primitive};
+pub use crate::ast::types::{Type, Primitive};
 pub use crate::ast::expression::{Expression, Property, PropertyKey};
 pub use crate::ast::statement::{Statement, Declarator, BlockStatement};
 pub use crate::ast::function::{Function, Class, ClassMember, Method, MethodKind};
@@ -59,8 +59,8 @@ pub type StatementNode<'ast> = Node<'ast, Statement<'ast>>;
 pub type StatementList<'ast> = NodeList<'ast, Statement<'ast>>;
 pub type IdentifierNode<'ast> = Node<'ast, &'ast str>;
 pub type IdentifierList<'ast> = NodeList<'ast, &'ast str>;
-// pub type TypeNode<'ast> = NodeList<'ast, Type<'ast>>;
-// pub type TypeList<'ast> = NodeList<'ast, Type<'ast>>;
+pub type TypeNode<'ast> = NodeList<'ast, Type<'ast>>;
+pub type TypeList<'ast> = NodeList<'ast, Type<'ast>>;
 
 #[derive(Debug, Clone)]
 pub struct Loc<T> {

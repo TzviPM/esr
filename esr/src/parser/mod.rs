@@ -2,24 +2,24 @@
 mod macros;
 mod error;
 mod expression;
-mod statement;
 mod function;
 mod nested;
+mod statement;
 
-use toolshed::list::ListBuilder;
-use toolshed::Arena;
 use crate::error::Error;
 use crate::module::Module;
+use toolshed::list::ListBuilder;
+use toolshed::Arena;
 
 use self::error::ToError;
 use self::nested::*;
 
-use crate::ast::{Loc, Node, Statement, NodeList, Block, BlockNode};
-use crate::ast::{Expression, ExpressionNode, ExpressionList, IdentifierNode};
-use crate::ast::{OperatorKind, Pattern};
 use crate::ast::expression::BinaryExpression;
-use crate::lexer::{Lexer, Asi};
+use crate::ast::{Block, BlockNode, Loc, Node, NodeList, Statement};
+use crate::ast::{Expression, ExpressionList, ExpressionNode, IdentifierNode};
+use crate::ast::{OperatorKind, Pattern};
 use crate::lexer::Token::*;
+use crate::lexer::{Asi, Lexer};
 
 pub trait Parse<'ast> {
     type Output;
@@ -76,14 +76,16 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn alloc<T>(&mut self, val: Loc<T>) -> Node<'ast, T> where
+    fn alloc<T>(&mut self, val: Loc<T>) -> Node<'ast, T>
+    where
         T: Copy,
     {
         Node::new(self.arena.alloc(val))
     }
 
     #[inline]
-    fn alloc_in_loc<T, I>(&mut self, item: I) -> Node<'ast, T> where
+    fn alloc_in_loc<T, I>(&mut self, item: I) -> Node<'ast, T>
+    where
         T: Copy,
         I: Into<T>,
     {
@@ -92,7 +94,8 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn alloc_at_loc<T, I>(&mut self, start: u32, end: u32, item: I) -> Node<'ast, T> where
+    fn alloc_at_loc<T, I>(&mut self, start: u32, end: u32, item: I) -> Node<'ast, T>
+    where
         T: Copy,
         I: Into<T>,
     {
@@ -116,40 +119,45 @@ impl<'ast> Parser<'ast> {
     }
 
     #[inline]
-    fn block<I>(&mut self) -> BlockNode<'ast, I> where
-        I: Parse<'ast, Output = Node<'ast, I>> + Copy
+    fn block<I>(&mut self) -> BlockNode<'ast, I>
+    where
+        I: Parse<'ast, Output = Node<'ast, I>> + Copy,
     {
         let start = self.lexer.start();
 
         match self.lexer.token {
             BraceOpen => self.lexer.consume(),
-            _         => self.error::<()>(),
+            _ => self.error::<()>(),
         }
 
         let block = self.raw_block();
-        let end   = self.lexer.end_then_consume();
+        let end = self.lexer.end_then_consume();
 
         self.alloc_at_loc(start, end, block)
     }
 
     /// Same as above, but assumes that the opening brace has already been checked
     #[inline]
-    fn unchecked_block<I>(&mut self) -> BlockNode<'ast, I> where
-        I: Parse<'ast, Output = Node<'ast, I>> + Copy
+    fn unchecked_block<I>(&mut self) -> BlockNode<'ast, I>
+    where
+        I: Parse<'ast, Output = Node<'ast, I>> + Copy,
     {
         let start = self.lexer.start_then_consume();
         let block = self.raw_block();
-        let end   = self.lexer.end_then_consume();
+        let end = self.lexer.end_then_consume();
 
         self.alloc_at_loc(start, end, block)
     }
 
     #[inline]
-    fn raw_block<I>(&mut self) -> Block<'ast, I> where
-        I: Parse<'ast, Output = Node<'ast, I>> + Copy
+    fn raw_block<I>(&mut self) -> Block<'ast, I>
+    where
+        I: Parse<'ast, Output = Node<'ast, I>> + Copy,
     {
         if self.lexer.token == BraceClose {
-            return Block { body: NodeList::empty() };
+            return Block {
+                body: NodeList::empty(),
+            };
         }
 
         let statement = I::parse(self);
@@ -159,7 +167,9 @@ impl<'ast> Parser<'ast> {
             builder.push(self.arena, I::parse(self));
         }
 
-        Block { body: builder.as_list() }
+        Block {
+            body: builder.as_list(),
+        }
     }
 
     #[inline]
@@ -170,35 +180,37 @@ impl<'ast> Parser<'ast> {
                 let ident = self.alloc_in_loc(ident);
                 self.lexer.consume();
                 ident
-            },
-            _ => self.error()
+            }
+            _ => self.error(),
         }
     }
 
     #[inline]
-    fn pattern_from_expression(&mut self, expression: ExpressionNode<'ast>) -> Node<'ast, Pattern<'ast>> {
+    fn pattern_from_expression(
+        &mut self,
+        expression: ExpressionNode<'ast>,
+    ) -> Node<'ast, Pattern<'ast>> {
         let pattern = match expression.item {
             Expression::Binary(BinaryExpression {
                 operator: OperatorKind::Assign,
                 left,
                 right,
-            }) => {
-                Pattern::AssignmentPattern {
-                    left: self.pattern_from_expression(left),
-                    right
-                }
+            }) => Pattern::AssignmentPattern {
+                left: self.pattern_from_expression(left),
+                right,
             },
-            Expression::Identifier(ident) => {
-                Pattern::Identifier(ident)
-            },
-            _ => self.error()
+            Expression::Identifier(ident) => Pattern::Identifier(ident),
+            _ => self.error(),
         };
 
         self.alloc_at_loc(expression.start, expression.end, pattern)
     }
 
     #[inline]
-    fn params_from_expressions(&mut self, expressions: ExpressionList<'ast>) -> NodeList<'ast, Pattern<'ast>> {
+    fn params_from_expressions(
+        &mut self,
+        expressions: ExpressionList<'ast>,
+    ) -> NodeList<'ast, Pattern<'ast>> {
         let mut expressions = expressions.iter();
 
         let builder = match expressions.next() {
@@ -206,8 +218,8 @@ impl<'ast> Parser<'ast> {
                 let param = self.pattern_from_expression(expression);
 
                 ListBuilder::new(self.arena, param)
-            },
-            None => return NodeList::empty()
+            }
+            None => return NodeList::empty(),
         };
 
         for &expression in expressions {
@@ -232,34 +244,36 @@ pub fn parse<'src, 'ast>(source: &'src str) -> Result<Module<'ast>, Vec<Error>> 
 
     match errors.len() {
         0 => Ok(Module::new(body, arena)),
-        _ => Err(errors)
+        _ => Err(errors),
     }
 }
 
 #[cfg(test)]
 mod mock {
     use super::*;
-    use crate::ast::{Literal, ExpressionNode, Block, BlockNode, Name};
+    use crate::ast::{Block, BlockNode, ExpressionNode, Literal, Name};
 
     pub struct Mock {
-        arena: Arena
+        arena: Arena,
     }
 
     impl Mock {
         pub fn new() -> Self {
             Mock {
-                arena: Arena::new()
+                arena: Arena::new(),
             }
         }
 
-        pub fn ptr<'a, T, I>(&'a self, val: I) -> Node<'a, T> where
+        pub fn ptr<'a, T, I>(&'a self, val: I) -> Node<'a, T>
+        where
             T: 'a + Copy,
             I: Into<T>,
         {
             Node::new(self.arena.alloc(Loc::new(0, 0, val.into())))
         }
 
-        pub fn name<'a, N>(&'a self, val: &'a str) -> N where
+        pub fn name<'a, N>(&'a self, val: &'a str) -> N
+        where
             N: Name<'a> + From<Node<'a, &'a str>>,
         {
             N::from(Node::new(self.arena.alloc(Loc::new(0, 0, val))))
@@ -269,26 +283,36 @@ mod mock {
             self.ptr(Literal::Number(number))
         }
 
-        pub fn block<I, T, L>(&self, list: L) -> BlockNode<'_, I> where
+        pub fn block<I, T, L>(&self, list: L) -> BlockNode<'_, I>
+        where
             I: Copy,
             T: Into<I> + Copy,
-            L: AsRef<[T]>
+            L: AsRef<[T]>,
         {
-            self.ptr(Block { body: self.list(list) })
+            self.ptr(Block {
+                body: self.list(list),
+            })
         }
 
         pub fn empty_block<I: Copy>(&self) -> BlockNode<'_, I> {
-            self.ptr(Block { body: NodeList::empty() })
+            self.ptr(Block {
+                body: NodeList::empty(),
+            })
         }
 
-        pub fn list<'a, T, I, L>(&'a self, list: L) -> NodeList<'a, T> where
+        pub fn list<'a, T, I, L>(&'a self, list: L) -> NodeList<'a, T>
+        where
             T: 'a + Copy,
             L: AsRef<[I]>,
             I: Into<T> + Copy,
         {
-            NodeList::from_iter(&self.arena, list.as_ref().iter().cloned().map(|i| {
-                Node::new(self.arena.alloc(Loc::new(0, 0, i.into())))
-            }))
+            NodeList::from_iter(
+                &self.arena,
+                list.as_ref()
+                    .iter()
+                    .cloned()
+                    .map(|i| Node::new(self.arena.alloc(Loc::new(0, 0, i.into())))),
+            )
         }
     }
 }
@@ -307,11 +331,7 @@ mod test {
     fn empty_statements() {
         let mock = Mock::new();
 
-        let expected = mock.list([
-            Statement::Empty,
-            Statement::Empty,
-            Statement::Empty
-        ]);
+        let expected = mock.list([Statement::Empty, Statement::Empty, Statement::Empty]);
 
         assert_eq!(parse(";;;").unwrap().body(), expected);
     }

@@ -166,20 +166,15 @@ const EQL: ByteHandler = Some(|lex| {
         b'=' => match lex.next_byte() {
             b'=' => {
                 lex.bump();
-
-                OperatorStrictEquality
-            }
-
-            _ => OperatorEquality,
+                StrictEquality
+            },
+            _ => Equality,
         },
-
         b'>' => {
             lex.bump();
-
-            OperatorFatArrow
-        }
-
-        _ => OperatorAssign,
+            FatArrow
+        },
+        _ => Assign,
     };
 });
 
@@ -189,98 +184,42 @@ const EXL: ByteHandler = Some(|lex| {
         b'=' => match lex.next_byte() {
             b'=' => {
                 lex.bump();
-
-                OperatorStrictInequality
+                StrictInequality
             }
-
-            _ => OperatorInequality,
+            _ => Inequality,
         },
-
-        _ => OperatorLogicalNot,
+        _ => Exclamation,
     };
 });
 
 // <
 const LSS: ByteHandler = Some(|lex| {
-    lex.token = match lex.next_byte() {
-        b'<' => match lex.next_byte() {
-            b'=' => {
-                lex.bump();
-
-                OperatorBSLAssign
-            }
-
-            _ => OperatorBitShiftLeft,
-        },
-
-        b'=' => {
-            lex.bump();
-
-            OperatorLesserEquals
-        }
-
-        _ => OperatorLesser,
-    };
+    lex.bump();
+    lex.token = Lesser;
 });
 
 // >
 const MOR: ByteHandler = Some(|lex| {
-    lex.token = match lex.next_byte() {
-        b'>' => match lex.next_byte() {
-            b'>' => match lex.next_byte() {
-                b'=' => {
-                    lex.bump();
-
-                    OperatorUBSRAssign
-                }
-
-                _ => OperatorUBitShiftRight,
-            },
-
-            b'=' => {
-                lex.bump();
-
-                OperatorBSRAssign
-            }
-
-            _ => OperatorBitShiftRight,
-        },
-
-        b'=' => {
-            lex.bump();
-
-            OperatorGreaterEquals
-        }
-
-        _ => OperatorGreater,
-    };
+    lex.bump();
+    lex.token = Greater;
 });
 
 // ?
 const QST: ByteHandler = Some(|lex| {
     lex.bump();
-
-    lex.token = OperatorConditional;
+    lex.token = QuestionMark;
 });
 
 // ~
 const TLD: ByteHandler = Some(|lex| {
     lex.bump();
-
-    lex.token = OperatorBitwiseNot;
+    lex.token = Tilde;
 });
 
 // ^
 const CRT: ByteHandler = Some(|lex| {
-    lex.token = match lex.next_byte() {
-        b'=' => {
-            lex.bump();
-
-            OperatorBitXorAssign
-        }
-
-        _ => OperatorBitwiseXor,
-    };
+    lex.bump();
+    lex.token = Caret;
 });
 
 // &
@@ -288,17 +227,9 @@ const AMP: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
         b'&' => {
             lex.bump();
-
-            OperatorLogicalAnd
-        }
-
-        b'=' => {
-            lex.bump();
-
-            OperatorBitAndAssign
-        }
-
-        _ => OperatorBitwiseAnd,
+            LogicalAnd
+        },
+        _ => Ampersand,
     };
 });
 
@@ -307,17 +238,9 @@ const PIP: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
         b'|' => {
             lex.bump();
-
-            OperatorLogicalOr
-        }
-
-        b'=' => {
-            lex.bump();
-
-            OperatorBitOrAssign
-        }
-
-        _ => OperatorBitwiseOr,
+            LogicalOr
+        },
+        _ => Pipe,
     };
 });
 
@@ -326,17 +249,9 @@ const PLS: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
         b'+' => {
             lex.bump();
-
-            OperatorIncrement
-        }
-
-        b'=' => {
-            lex.bump();
-
-            OperatorAddAssign
-        }
-
-        _ => OperatorAddition,
+            Increment
+        },
+        _ => Plus,
     };
 });
 
@@ -345,60 +260,38 @@ const MIN: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
         b'-' => {
             lex.bump();
-
-            OperatorDecrement
-        }
-
-        b'=' => {
-            lex.bump();
-
-            OperatorSubtractAssign
-        }
-
-        _ => OperatorSubtraction,
+            Decrement
+        },
+        _ => Minus,
     };
 });
 
 // *
 const ATR: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        b'*' => match lex.next_byte() {
-            b'=' => {
-                lex.bump();
-
-                OperatorExponentAssign
-            }
-
-            _ => OperatorExponent,
-        },
-
-        b'=' => {
+        b'*' => {
             lex.bump();
-
-            OperatorMultiplyAssign
-        }
-
-        _ => OperatorMultiplication,
+            Exponent
+        },
+        _ => Asterisk,
     };
 });
 
 // /
 const SLH: ByteHandler = Some(|lex| {
     lex.token = match lex.next_byte() {
-        // regular comment
         b'/' => {
             // Keep consuming bytes until new line or end of source
             unwind_loop!({
                 match lex.next_byte() {
                     0 | b'\n' => {
-                        return lex.consume();
-                    }
+                        lex.bump();
+                        return lex.token = Comment(CommentType::SingleLine);
+                    },
                     _ => {}
                 }
             });
-        }
-
-        // block comment
+        },
         b'*' => {
             lex.bump();
             // Keep consuming bytes until */ happens in a row
@@ -407,7 +300,7 @@ const SLH: ByteHandler = Some(|lex| {
                     b'*' => match lex.next_byte() {
                         b'/' => {
                             lex.bump();
-                            return lex.consume();
+                            return lex.token = Comment(CommentType::MultiLine);
                         }
                         0 => return lex.token = UnexpectedEndOfProgram,
                         _ => {}
@@ -416,29 +309,15 @@ const SLH: ByteHandler = Some(|lex| {
                     _ => lex.bump(),
                 }
             });
-        }
-
-        b'=' => {
-            lex.bump();
-
-            OperatorDivideAssign
-        }
-
-        _ => OperatorDivision,
+        },
+        _ => ForwardSlash,
     };
 });
 
 // %
 const PRC: ByteHandler = Some(|lex| {
-    lex.token = match lex.next_byte() {
-        b'=' => {
-            lex.bump();
-
-            OperatorRemainderAssign
-        }
-
-        _ => OperatorRemainder,
-    };
+    lex.bump();
+    lex.token = Remainder;
 });
 
 // Unicode character
@@ -489,33 +368,11 @@ const ZER: ByteHandler = Some(|lex| {
         _ => {}
     }
 
-    loop {
+    unwind_loop!({
         match lex.read_byte() {
             b'0'..=b'9' => {
-                lex.bump();
+                lex.read_decimal();
             }
-            b'.' => {
-                lex.bump();
-
-                return lex.read_float();
-            }
-            b'e' | b'E' => {
-                lex.bump();
-
-                return lex.read_scientific();
-            }
-            _ => break,
-        }
-    }
-
-    lex.token = LiteralNumber;
-});
-
-// 1 to 9
-const DIG: ByteHandler = Some(|lex| {
-    unwind_loop!({
-        match lex.next_byte() {
-            b'0'..=b'9' => {}
             b'.' => {
                 lex.bump();
 
@@ -527,8 +384,32 @@ const DIG: ByteHandler = Some(|lex| {
                 return lex.read_scientific();
             }
             _ => {
-                return lex.token = LiteralNumber;
+                return lex.token = Literal(LiteralType::Number);
+            },
+        }
+    });
+});
+
+// 1 to 9
+const DIG: ByteHandler = Some(|lex| {
+    unwind_loop!({
+        match lex.read_byte() {
+            b'0'..=b'9' => {
+                lex.read_decimal();
             }
+            b'.' => {
+                lex.bump();
+
+                return lex.read_float();
+            }
+            b'e' | b'E' => {
+                lex.bump();
+
+                return lex.read_scientific();
+            }
+            _ => {
+                return lex.token = Literal(LiteralType::Number);
+            },
         }
     });
 });
@@ -540,21 +421,17 @@ const PRD: ByteHandler = Some(|lex| {
             lex.bump();
 
             lex.read_float()
-        }
-
+        },
         b'.' => {
             lex.token = match lex.next_byte() {
                 b'.' => {
                     lex.bump();
-
-                    OperatorSpread
-                }
-
+                    return lex.token = RestSpread;
+                },
                 _ => UnexpectedToken,
             }
-        }
-
-        _ => lex.read_accessor(),
+        },
+        _ => lex.token = Dot,
     };
 });
 
@@ -568,15 +445,15 @@ const QOT: ByteHandler = Some(|lex| {
         match lex.read_byte() {
             ch if ch == style => {
                 lex.bump();
-                return lex.token = LiteralString;
-            }
+                return lex.token = Literal(LiteralType::String);
+            },
             b'\\' => {
                 lex.bump();
                 expect_byte!(lex);
-            }
+            },
             0 => {
                 return lex.token = UnexpectedEndOfProgram;
-            }
+            },
             _ => lex.bump(),
         }
     });
@@ -816,23 +693,6 @@ impl<'arena> Lexer<'arena> {
         self.read_byte()
     }
 
-    #[inline]
-    fn read_binary(&mut self) {
-        loop {
-            match self.read_byte() {
-                b'0' => {
-                    self.bump();
-                }
-                b'1' => {
-                    self.bump();
-                }
-                _ => break,
-            }
-        }
-
-        self.token = LiteralBinary;
-    }
-
     /// This is a specialized method that expects the next token to be an identifier,
     /// even if it would otherwise be a keyword.
     ///
@@ -875,7 +735,6 @@ impl<'arena> Lexer<'arena> {
                 // return unicode(self)
                 } else if TABLE[ch as usize] {
                     self.read_label();
-                    return self.token = Accessor;
                 } else {
                     return self.token = UnexpectedToken;
                 }
@@ -907,43 +766,148 @@ impl<'arena> Lexer<'arena> {
     }
 
     #[inline]
-    fn read_octal(&mut self) {
-        while match self.read_byte() {
-            b'0'..=b'7' => true,
-            _ => false,
-        } {
-            self.bump();
+    fn read_binary(&mut self) {
+        match self.read_byte() {
+            b'0'..=b'1' => {
+                self.bump();
+            },
+            _ => {
+                self.token = UnexpectedToken;
+                return;
+            },
         }
 
-        self.token = LiteralNumber;
+        loop {
+            match self.read_byte() {
+                b'0'..=b'1' => {
+                    self.bump();
+                },
+                b'_' => {
+                    self.bump();
+                    return self.read_binary();
+                },
+                _ => {
+                    break;
+                },
+            }
+        }
+
+        self.token = Literal(LiteralType::Number);
+    }
+
+    #[inline]
+    fn read_octal(&mut self) {
+        match self.read_byte() {
+            b'0'..=b'7' => {
+                self.bump();
+            },
+            _ => {
+                self.token = UnexpectedToken;
+                return;
+            },
+        }
+        loop {
+            match self.read_byte() {
+                b'0'..=b'7' => {
+                    self.bump();
+                },
+                b'_' => {
+                    self.bump();
+                    return self.read_octal();
+                },
+                _ => {
+                    break;
+                },
+            }
+        }
+
+        self.token = Literal(LiteralType::Number);
+    }
+
+    #[inline]
+    fn read_decimal(&mut self) {
+        match self.read_byte() {
+            b'0'..=b'9' => {
+                self.bump();
+            },
+            _ => {
+                self.token = UnexpectedToken;
+                return;
+            },
+        }
+        loop {
+            match self.read_byte() {
+                b'0'..=b'9' => {
+                    self.bump();
+                },
+                b'_' => {
+                    self.bump();
+                    return self.read_decimal();
+                },
+                _ => {
+                    break;
+                },
+            }
+        }
+
+        self.token = Literal(LiteralType::Number);
     }
 
     #[inline]
     fn read_hexadec(&mut self) {
-        while match self.read_byte() {
-            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => true,
-            _ => false,
-        } {
-            self.bump();
+        match self.read_byte() {
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => {
+                self.bump();
+            },
+            _ => {
+                self.token = UnexpectedToken;
+                return;
+            },
+        }
+        loop {
+            match self.read_byte() {
+                b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => {
+                    self.bump();
+                },
+                b'_' => {
+                    self.bump();
+                    return self.read_binary();
+                },
+                _ => {
+                    break;
+                },
+            }
         }
 
-        self.token = LiteralNumber;
+        self.token = Literal(LiteralType::Number);
     }
 
     #[inline]
     fn read_float(&mut self) {
+        match self.read_byte() {
+            b'0'..=b'9' => {
+                self.bump();
+            },
+            _ => {
+                return;
+            },
+        }
         loop {
             match self.read_byte() {
-                b'0'..=b'9' => self.bump(),
-                b'e' | b'E' => {
+                b'0'..=b'9' => {
                     self.bump();
-                    return self.read_scientific();
-                }
-                _ => break,
+                },
+                b'_' => {
+                    self.bump();
+                    return self.read_decimal();
+                },
+                _ => {
+                    break;
+                },
             }
         }
 
-        self.token = LiteralNumber;
+        self.token = Literal(LiteralType::Number);
     }
 
     #[inline]
@@ -953,14 +917,7 @@ impl<'arena> Lexer<'arena> {
             _ => {}
         }
 
-        while match self.read_byte() {
-            b'0'..=b'9' => true,
-            _ => false,
-        } {
-            self.bump();
-        }
-
-        self.token = LiteralNumber;
+        self.read_decimal()
     }
 
     #[inline]
@@ -1010,7 +967,7 @@ impl<'arena> Lexer<'arena> {
             }
         }
 
-        self.token = LiteralRegEx;
+        self.token = Literal(LiteralType::RegEx);
         self.slice_from(start)
     }
 }
@@ -1042,14 +999,14 @@ mod test {
 
     #[test]
     fn line_comment() {
-        assert_lex(" // foo", []);
+        assert_lex(" // foo", [(Comment(CommentType::SingleLine), "// foo")]);
     }
 
     #[test]
     fn block_comment() {
-        assert_lex(" /* foo */ bar", [(Identifier, "bar")]);
-        assert_lex(" /** foo **/ bar", [(Identifier, "bar")]);
-        assert_lex(" /*abc foo **/ bar", [(Identifier, "bar")]);
+        assert_lex(" /* foo */ bar", [(Comment(CommentType::MultiLine), "/* foo */"), (Identifier, "bar")]);
+        assert_lex(" /** foo **/ bar", [(Comment(CommentType::MultiLine), "/** foo **/"), (Identifier, "bar")]);
+        assert_lex(" /*abc foo **/ bar", [(Comment(CommentType::MultiLine), "/*abc foo **/"), (Identifier, "bar")]);
     }
 
     #[test]
@@ -1058,7 +1015,8 @@ mod test {
             "foo.bar();",
             [
                 (Identifier, "foo"),
-                (Accessor, ".bar"),
+                (Dot, "."),
+                (Identifier, "bar"),
                 (ParenOpen, "("),
                 (ParenClose, ")"),
                 (Semicolon, ";"),
@@ -1072,7 +1030,8 @@ mod test {
             "foo.function();",
             [
                 (Identifier, "foo"),
-                (Accessor, ".function"),
+                (Dot, "."),
+                (Identifier, "function"),
                 (ParenOpen, "("),
                 (ParenClose, ")"),
                 (Semicolon, ";"),
@@ -1085,12 +1044,12 @@ mod test {
         assert_lex(
             "let foo = 2 + 2;",
             [
-                (DeclarationLet, "let"),
+                (Keyword(KeywordName::Let), "let"),
                 (Identifier, "foo"),
-                (OperatorAssign, "="),
-                (LiteralNumber, "2"),
-                (OperatorAddition, "+"),
-                (LiteralNumber, "2"),
+                (Assign, "="),
+                (Literal(LiteralType::Number), "2"),
+                (Plus, "+"),
+                (Literal(LiteralType::Number), "2"),
                 (Semicolon, ";"),
             ],
         );
@@ -1101,14 +1060,14 @@ mod test {
         assert_lex(
             "var x, y, z = 42;",
             [
-                (DeclarationVar, "var"),
+                (Keyword(KeywordName::Var), "var"),
                 (Identifier, "x"),
                 (Comma, ","),
                 (Identifier, "y"),
                 (Comma, ","),
                 (Identifier, "z"),
-                (OperatorAssign, "="),
-                (LiteralNumber, "42"),
+                (Assign, "="),
+                (Literal(LiteralType::Number), "42"),
                 (Semicolon, ";"),
             ],
         );
@@ -1119,13 +1078,13 @@ mod test {
         assert_lex(
             "function foo(bar) { return bar }",
             [
-                (Function, "function"),
+                (Keyword(KeywordName::Function), "function"),
                 (Identifier, "foo"),
                 (ParenOpen, "("),
                 (Identifier, "bar"),
                 (ParenClose, ")"),
                 (BraceOpen, "{"),
-                (Return, "return"),
+                (Keyword(KeywordName::Return), "return"),
                 (Identifier, "bar"),
                 (BraceClose, "}"),
             ],
@@ -1153,48 +1112,48 @@ mod test {
                 true try undefined typeof var void while with yield
             ",
             &[
-                (Break, "break"),
-                (Case, "case"),
-                (Class, "class"),
-                (DeclarationConst, "const"),
-                (Debugger, "debugger"),
-                (Default, "default"),
-                (OperatorDelete, "delete"),
-                (Do, "do"),
-                (Else, "else"),
-                (Export, "export"),
-                (Extends, "extends"),
-                (LiteralFalse, "false"),
-                (Finally, "finally"),
-                (For, "for"),
-                (Function, "function"),
-                (If, "if"),
-                (ReservedImplements, "implements"),
-                (Import, "import"),
-                (OperatorIn, "in"),
-                (OperatorInstanceof, "instanceof"),
-                (ReservedInterface, "interface"),
-                (DeclarationLet, "let"),
-                (OperatorNew, "new"),
-                (LiteralNull, "null"),
-                (ReservedPackage, "package"),
-                (ReservedProtected, "protected"),
-                (ReservedPublic, "public"),
-                (Return, "return"),
-                (Static, "static"),
-                (Super, "super"),
-                (Switch, "switch"),
-                (This, "this"),
-                (Throw, "throw"),
-                (LiteralTrue, "true"),
-                (Try, "try"),
-                (LiteralUndefined, "undefined"),
-                (OperatorTypeof, "typeof"),
-                (DeclarationVar, "var"),
-                (OperatorVoid, "void"),
-                (While, "while"),
-                (With, "with"),
-                (Yield, "yield"),
+                (Keyword(KeywordName::Break), "break"),
+                (Keyword(KeywordName::Case), "case"),
+                (Keyword(KeywordName::Class), "class"),
+                (Keyword(KeywordName::Const), "const"),
+                (Keyword(KeywordName::Debugger), "debugger"),
+                (Keyword(KeywordName::Default), "default"),
+                (Delete, "delete"),
+                (Keyword(KeywordName::Do), "do"),
+                (Keyword(KeywordName::Else), "else"),
+                (Keyword(KeywordName::Export), "export"),
+                (Keyword(KeywordName::Extends), "extends"),
+                (Literal(LiteralType::False), "false"),
+                (Keyword(KeywordName::Finally), "finally"),
+                (Keyword(KeywordName::For), "for"),
+                (Keyword(KeywordName::Function), "function"),
+                (Keyword(KeywordName::If), "if"),
+                (Keyword(KeywordName::Implements), "implements"),
+                (Keyword(KeywordName::Import), "import"),
+                (In, "in"),
+                (Instanceof, "instanceof"),
+                (Keyword(KeywordName::Interface), "interface"),
+                (Keyword(KeywordName::Let), "let"),
+                (New, "new"),
+                (Literal(LiteralType::Null), "null"),
+                (Keyword(KeywordName::Package), "package"),
+                (Keyword(KeywordName::Protected), "protected"),
+                (Keyword(KeywordName::Public), "public"),
+                (Keyword(KeywordName::Return), "return"),
+                (Keyword(KeywordName::Static), "static"),
+                (Keyword(KeywordName::Super), "super"),
+                (Keyword(KeywordName::Switch), "switch"),
+                (Keyword(KeywordName::This), "this"),
+                (Keyword(KeywordName::Throw), "throw"),
+                (Literal(LiteralType::True), "true"),
+                (Keyword(KeywordName::Try), "try"),
+                (Literal(LiteralType::Undefined), "undefined"),
+                (Typeof, "typeof"),
+                (Keyword(KeywordName::Var), "var"),
+                (Void, "void"),
+                (Keyword(KeywordName::While), "while"),
+                (Keyword(KeywordName::With), "with"),
+                (Keyword(KeywordName::Yield), "yield"),
             ][..],
         );
     }
@@ -1208,54 +1167,93 @@ mod test {
                 ? = += -= **= *= /= %= <<= >>= >>>= &= ^= |= ...
             ",
             &[
-                (OperatorFatArrow, "=>"),
-                (OperatorNew, "new"),
-                (OperatorIncrement, "++"),
-                (OperatorDecrement, "--"),
-                (OperatorLogicalNot, "!"),
-                (OperatorBitwiseNot, "~"),
-                (OperatorTypeof, "typeof"),
-                (OperatorVoid, "void"),
-                (OperatorDelete, "delete"),
-                (OperatorMultiplication, "*"),
-                (OperatorDivision, "/"),
-                (OperatorRemainder, "%"),
-                (OperatorExponent, "**"),
-                (OperatorAddition, "+"),
-                (OperatorSubtraction, "-"),
-                (OperatorBitShiftLeft, "<<"),
-                (OperatorBitShiftRight, ">>"),
-                (OperatorUBitShiftRight, ">>>"),
-                (OperatorLesser, "<"),
-                (OperatorLesserEquals, "<="),
-                (OperatorGreater, ">"),
-                (OperatorGreaterEquals, ">="),
-                (OperatorInstanceof, "instanceof"),
-                (OperatorIn, "in"),
-                (OperatorStrictEquality, "==="),
-                (OperatorStrictInequality, "!=="),
-                (OperatorEquality, "=="),
-                (OperatorInequality, "!="),
-                (OperatorBitwiseAnd, "&"),
-                (OperatorBitwiseXor, "^"),
-                (OperatorBitwiseOr, "|"),
-                (OperatorLogicalAnd, "&&"),
-                (OperatorLogicalOr, "||"),
-                (OperatorConditional, "?"),
-                (OperatorAssign, "="),
-                (OperatorAddAssign, "+="),
-                (OperatorSubtractAssign, "-="),
-                (OperatorExponentAssign, "**="),
-                (OperatorMultiplyAssign, "*="),
-                (OperatorDivideAssign, "/="),
-                (OperatorRemainderAssign, "%="),
-                (OperatorBSLAssign, "<<="),
-                (OperatorBSRAssign, ">>="),
-                (OperatorUBSRAssign, ">>>="),
-                (OperatorBitAndAssign, "&="),
-                (OperatorBitXorAssign, "^="),
-                (OperatorBitOrAssign, "|="),
-                (OperatorSpread, "..."),
+                (FatArrow, "=>"),
+                (New, "new"),
+                (Increment, "++"),
+                (Decrement, "--"),
+                (Exclamation, "!"),
+                (Tilde, "~"),
+                (Typeof, "typeof"),
+                (Void, "void"),
+                (Delete, "delete"),
+                (Asterisk, "*"),
+                (ForwardSlash, "/"),
+                (Remainder, "%"),
+                (Exponent, "**"),
+                (Plus, "+"),
+                (Minus, "-"),
+                // <<
+                (Lesser, "<"),
+                (Lesser, "<"),
+                // >>
+                (Greater, ">"),
+                (Greater, ">"),
+                // >>>
+                (Greater, ">"),
+                (Greater, ">"),
+                (Greater, ">"),
+                (Lesser, "<"),
+                // <=
+                (Lesser, "<"),
+                (Assign, "="),
+                (Greater, ">"),
+                //  >=
+                (Greater, ">"),
+                (Assign, "="),
+                (Instanceof, "instanceof"),
+                (In, "in"),
+                (StrictEquality, "==="),
+                (StrictInequality, "!=="),
+                (Equality, "=="),
+                (Inequality, "!="),
+                (Ampersand, "&"),
+                (Caret, "^"),
+                (Pipe, "|"),
+                (LogicalAnd, "&&"),
+                (LogicalOr, "||"),
+                (QuestionMark, "?"),
+                (Assign, "="),
+                // +=
+                (Plus, "+"),
+                (Assign, "="),
+                // -=
+                (Minus, "-="),
+                (Assign, "="),
+                // **=
+                (Exponent, "**"),
+                (Assign, "="),
+                // *=
+                (Asterisk, "*"),
+                (Assign, "="),
+                // /=
+                (ForwardSlash, "/"),
+                (Assign, "="),
+                // %=
+                (Remainder, "%"),
+                (Assign, "="),
+                // <<=
+                (Lesser, "<"),
+                (Lesser, "<"),
+                (Assign, "="),
+                // >>=
+                (Greater, ">"),
+                (Greater, ">"),
+                (Assign, "="),
+                // >>>=
+                (Greater, ">"),
+                (Greater, ">"),
+                (Greater, ">"),
+                (Assign, "="),
+                // &=
+                (Ampersand, "&"),
+                (Assign, "="),
+                // ^=
+                (Caret, "^"),
+                (Assign, "="),
+                // |=
+                (Pipe, "|"),
+                (Assign, "="),
+                (RestSpread, "..."),
             ][..],
         );
     }
@@ -1265,14 +1263,14 @@ mod test {
         assert_lex(
             "const foo: number = 2 + 2;",
             &[
-                (DeclarationConst, "const"),
+                (Keyword(KeywordName::Const), "const"),
                 (Identifier, "foo"),
                 (Colon, ":"),
-                (KeywordNumber, "number"),
-                (OperatorAssign, "="),
-                (LiteralNumber, "2"),
-                (OperatorAddition, "+"),
-                (LiteralNumber, "2"),
+                (Type(TypeName::Number), "number"),
+                (Assign, "="),
+                (Literal(LiteralType::Number), "2"),
+                (Plus, "+"),
+                (Literal(LiteralType::Number), "2"),
                 (Semicolon, ";"),
             ][..],
         );
@@ -1283,15 +1281,15 @@ mod test {
         assert_lex(
             "function isFoo(bar: string): boolean { return bar }",
             &[
-                (Function, "function"),
+                (Keyword(KeywordName::Function), "function"),
                 (Identifier, "isFoo"),
                 (ParenOpen, "("),
                 (Identifier, "bar"),
                 (Colon, ":"),
-                (KeywordString, "string"),
+                (Type(TypeName::String), "string"),
                 (ParenClose, ")"),
                 (Colon, ":"),
-                (KeywordBoolean, "boolean"),
+                (Type(TypeName::Boolean), "boolean"),
                 (BraceOpen, "{"),
                 (Return, "return"),
                 (Identifier, "bar"),
@@ -1305,19 +1303,45 @@ mod test {
         assert_lex(
             "async function isFoo(bar) { await bar(); return; }",
             &[
-                (KeywordAsync, "async"),
-                (Function, "function"),
+                (Keyword(KeywordName::Async), "async"),
+                (Keyword(KeywordName::Function), "function"),
                 (Identifier, "isFoo"),
                 (ParenOpen, "("),
                 (Identifier, "bar"),
                 (ParenClose, ")"),
                 (BraceOpen, "{"),
-                (KeywordAwait, "await"),
+                (Keyword(KeywordName::Await), "await"),
                 (Identifier, "bar"),
                 (ParenOpen, "("),
                 (ParenClose, ")"),
                 (Semicolon, ";"),
-                (Return, "return"),
+                (Keyword(KeywordName::Return), "return"),
+                (Semicolon, ";"),
+                (BraceClose, "}"),
+            ][..],
+        );
+    }
+
+    #[test]
+    fn type_argument() {
+        assert_lex(
+            "function isFoo<T>(bar: T): T { return bar; }",
+            &[
+                (Keyword(KeywordName::Function), "function"),
+                (Identifier, "isFoo"),
+                (Lesser, "<"),
+                (Identifier, "T"),
+                (Greater, ">"),
+                (ParenOpen, "("),
+                (Identifier, "bar"),
+                (Colon, ":"),
+                (Identifier, "T"),
+                (ParenClose, ")"),
+                (Colon, ":"),
+                (Identifier, "T"),
+                (BraceOpen, "{"),
+                (Keyword(KeywordName::Return), "return"),
+                (Identifier, "bar"),
                 (Semicolon, ";"),
                 (BraceClose, "}"),
             ][..],
